@@ -16,15 +16,16 @@ Add to your Claude Code `settings.json`:
 
 ```json
 {
-"mcpServers": {
-    "boe": {
-    "command": "npx",
-    "args": ["-y", "@moureauf/boe-mcp"]
+    "mcpServers": {
+        "boe": {
+        "command": "npx",
+        "args": ["-y", "@moureauf/boe-mcp"]
+        }
     }
 }
-}
+```
 
-Configuration
+## Configuration
 
 ┌───────────────────────┬─────────┬────────────────────────────┐
 │        Env var        │ Default │        Description         │
@@ -32,12 +33,12 @@ Configuration
 │ BOE_CACHE_TTL_MINUTES │ 60      │ How long to cache BoE data │
 └───────────────────────┴─────────┴────────────────────────────┘
 
-Data sources
+## Data sources
 
 - Base rate: BoE IADB series IUDBEDR — public, no auth
 - MPC dates: BoE website — parsed from public HTML
 
-Running from source
+## Running from source
 
 git clone https://github.com/moureauf/boe-mcp.git
 cd boe-mcp
