@@ -1,0 +1,23 @@
+{
+  "name": "@moureauf/boe-mcp",
+  "version": "0.1.0",
+  "description": "MCP server exposing Bank of England base rate data",
+  "type": "module",
+  "bin": {
+    "boe-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "mcp",
+    "bank-of-england",
+    "base-rate"
+  ],
+  "license": "MIT"
+}
