@@ -39,3 +39,8 @@ docs/specs/design.md  # full design spec — read this first
 
 ```bash
 npx @modelcontextprotocol/inspector node dist/index.js
+```
+
+## Git workflow
+- Never push directly to main
+- Always work on a feature branch and open a PR
