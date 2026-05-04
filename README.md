@@ -26,22 +26,23 @@ Add to your Claude Code `settings.json`:
 ```
 
 ## Configuration
-
+```
 ┌───────────────────────┬─────────┬────────────────────────────┐
 │        Env var        │ Default │        Description         │
 ├───────────────────────┼─────────┼────────────────────────────┤
 │ BOE_CACHE_TTL_MINUTES │ 60      │ How long to cache BoE data │
 └───────────────────────┴─────────┴────────────────────────────┘
-
+```
 ## Data sources
 
 - Base rate: BoE IADB series IUDBEDR — public, no auth
 - MPC dates: BoE website — parsed from public HTML
 
 ## Running from source
-
+```
 git clone https://github.com/moureauf/boe-mcp.git
 cd boe-mcp
 npm install
 npm run build
 npm start
+```
