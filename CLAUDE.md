@@ -44,3 +44,9 @@ npx @modelcontextprotocol/inspector node dist/index.js
 ## Git workflow
 - Never push directly to main
 - Always work on a feature branch and open a PR
+
+## Workflow
+- Before implementing any file or feature, propose a plan and wait for approval
+- Write tests before implementation (create the test file first, then implement)
+- After wiring up a new tool in index.ts, smoke test with:
+`npx @modelcontextprotocol/inspector node dist/index.js`
