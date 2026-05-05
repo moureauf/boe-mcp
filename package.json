@@ -19,5 +19,9 @@
     "bank-of-england",
     "base-rate"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "typescript": "^6.0.3"
+  }
 }

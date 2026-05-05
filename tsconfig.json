@@ -6,7 +6,8 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
-    "declaration": true
+    "declaration": true,
+    "types": ["node"]
   },
   "include": [
     "src"
