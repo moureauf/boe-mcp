@@ -4,7 +4,7 @@
   "description": "MCP server exposing Bank of England base rate data",
   "type": "module",
   "bin": {
-    "boe-mcp": "./dist/index.js"
+    "boe-mcp": "dist/index.js"
   },
   "scripts": {
     "build": "tsc",
