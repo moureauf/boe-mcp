@@ -52,6 +52,7 @@ let failed = false;
 for (const [name, args] of [
   ["get_current_rate", {}],
   ["get_rate_history", { limit: 5 }],
+  ["get_rate_at", { date: "2023-01-15" }],
   ["get_next_mpc_meeting", {}],
 ]) {
   const res = await request("tools/call", { name, arguments: args });

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { getCurrentRate } from "./tools/current-rate.js";
 import { DEFAULT_HISTORY_LIMIT, getRateHistory } from "./tools/rate-history.js";
 import { getNextMpcMeeting } from "./tools/next-meeting.js";
+import { getRateAt } from "./tools/rate-at.js";
 
 const server = new McpServer({ name: "boe-mcp", version: "0.1.0" });
 
@@ -90,6 +91,28 @@ server.registerTool(
     },
   },
   ({ limit }) => respond(() => getRateHistory(limit ?? DEFAULT_HISTORY_LIMIT)),
+);
+
+server.registerTool(
+  "get_rate_at",
+  {
+    title: "BoE base rate on a date",
+    description:
+      "Get the Bank of England base rate that was in force on a specific historical date, and when that level took effect.",
+    inputSchema: {
+      date: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/, "must be an ISO 8601 date (YYYY-MM-DD)")
+        .describe("The date to look up, ISO 8601 (YYYY-MM-DD)"),
+    },
+    outputSchema: {
+      date: isoDate.describe("The queried date"),
+      rate: z.number().describe("Base rate in percent in force on that date"),
+      effectiveDate: isoDate.describe("Date this rate level took effect"),
+      ...sourceFields,
+    },
+  },
+  ({ date }) => respond(() => getRateAt(date)),
 );
 
 server.registerTool(
