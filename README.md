@@ -8,6 +8,7 @@ An MCP (Model Context Protocol) server that gives Claude Code — or any MCP cli
 |------|-------------|----------------|
 | `get_current_rate` | Current base rate, effective date, months held at this level | `{ "rate": 3.75, "effectiveDate": "2025-12-18", "monthsHeld": 6, "source": "https://www.bankofengland.co.uk/boeapps/iadb/...", "cachedAt": "2026-07-07T04:11:28Z" }` |
 | `get_rate_history` | Last N rate changes (default 10) — date, rate, move in basis points vs previous (`null` for the earliest known entry) | `{ "entries": [{ "date": "2025-12-18", "rate": 3.75, "changeBps": -25 }, ...], "source": "...", "cachedAt": "..." }` |
+| `get_rate_at` | The base rate in force on a specific historical date | `{ "date": "2020-03-15", "rate": 0.25, "effectiveDate": "2020-03-11", "source": "...", "cachedAt": "..." }` |
 | `get_next_mpc_meeting` | Date of the next scheduled MPC announcement and days until it | `{ "date": "2026-07-30", "daysUntil": 23, "source": "https://www.bankofengland.co.uk/monetary-policy/upcoming-mpc-dates", "cachedAt": "..." }` |
 
 If the BoE is unreachable and a previously cached value exists, tools serve the cached data with `"stale": true` so the caller can flag the caveat. With no cache at all they return a clean error message.

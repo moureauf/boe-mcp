@@ -1,0 +1,17 @@
+name: Live canary
+# The BoE IADB is not an official API and the MPC dates page can be
+# redesigned. This weekly run of the live integration tests catches format
+# changes before users hit them. workflow_dispatch allows a manual run.
+on:
+  schedule:
+    - cron: "0 7 * * 1" # Mondays 07:00 UTC
+  workflow_dispatch:
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm ci
+      - run: npm run test:live

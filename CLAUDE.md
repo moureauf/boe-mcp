@@ -37,6 +37,7 @@ docs/specs/design.md  # full design spec — read this first
 |------|-------------|
 | `get_current_rate` | Current base rate, effective date, months held |
 | `get_rate_history` | Last N rate changes with basis points (default 10) |
+| `get_rate_at` | Base rate in force on a given historical date |
 | `get_next_mpc_meeting` | Date of next MPC meeting and days until it |
 
 ## Testing
