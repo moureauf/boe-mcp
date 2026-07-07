@@ -8,16 +8,18 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # npm provenance attestation
+      id-token: write # OIDC for npm trusted publishing + provenance
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           registry-url: https://registry.npmjs.org
+      # Trusted publishing needs npm >= 11.5.1; Node 24's bundled npm can lag it.
+      - run: npm install -g npm@latest
       - run: npm ci
       - run: npm run build
       - run: npm test
+      # No NODE_AUTH_TOKEN: auth comes from the OIDC token via the trusted
+      # publisher configured for this repo/workflow on npmjs.com.
       - run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

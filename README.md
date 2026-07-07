@@ -61,7 +61,7 @@ npx @modelcontextprotocol/inspector node dist/index.js
 
 ## Releasing
 
-Publishing is automated: pushing a `v*` tag runs `.github/workflows/publish.yml`, which builds, tests, and publishes to npm. It needs an `NPM_TOKEN` secret (an npm automation token) configured in the repository settings. See [RELEASING.md](RELEASING.md) for the exact steps.
+Publishing is automated: pushing a `v*` tag runs `.github/workflows/publish.yml`, which builds, tests, and publishes to npm via [trusted publishing](https://docs.npmjs.com/trusted-publishers/) (OIDC — no token secret) with a provenance attestation. See [RELEASING.md](RELEASING.md) for the exact steps.
 
 ## License
 
