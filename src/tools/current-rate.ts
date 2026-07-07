@@ -11,12 +11,16 @@ export interface CurrentRate {
 }
 
 // Whole calendar months elapsed between an ISO date and `now` (a month counts
-// once its day-of-month is reached). Never negative.
+// once its day-of-month is reached, clamped to the length of the current month
+// so e.g. Jan 31 -> Feb 28 counts as one month). Never negative.
 export function monthsBetween(fromIso: string, now: Date): number {
   const [y, m, d] = fromIso.split("-").map(Number);
   let months =
     (now.getUTCFullYear() - y) * 12 + (now.getUTCMonth() + 1 - m);
-  if (now.getUTCDate() < d) months -= 1;
+  const daysInCurrentMonth = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0),
+  ).getUTCDate();
+  if (now.getUTCDate() < Math.min(d, daysInCurrentMonth)) months -= 1;
   return Math.max(0, months);
 }
 

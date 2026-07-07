@@ -31,7 +31,9 @@ export async function getNextMpcMeeting(now = new Date()): Promise<NextMeetingRe
   const meeting = nextMeeting(dates, now);
   if (meeting === null) {
     throw new Error(
-      "The BoE upcoming-MPC-dates page lists no future meetings — the schedule may not have been published yet",
+      stale
+        ? "The BoE is currently unreachable and the cached MPC schedule only contains past dates — try again later"
+        : "The BoE upcoming-MPC-dates page lists no future meetings — the schedule may not have been published yet",
     );
   }
   return { ...meeting, source, cachedAt, ...(stale ? { stale: true } : {}) };

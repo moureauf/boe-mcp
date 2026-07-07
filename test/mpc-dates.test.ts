@@ -34,6 +34,29 @@ describe("parseMpcDates", () => {
   it("throws a clean error when the page contains no dates", () => {
     expect(() => parseMpcDates("<html><body>maintenance</body></html>")).toThrow(/no mpc dates/i);
   });
+
+  it("decodes non-breaking-space entities inside dates", () => {
+    const html = "<li>Thursday 5&nbsp;February&#160;2026</li>";
+    expect(parseMpcDates(html)).toEqual(["2026-02-05"]);
+  });
+
+  it("prefers dates inside <main> over unrelated dates elsewhere on the page", () => {
+    const html = `
+      <nav>News: rate decision of 7 August 2025</nav>
+      <main><li>Thursday 30 July 2026</li></main>
+      <footer>Page updated 1 July 2026</footer>`;
+    expect(parseMpcDates(html)).toEqual(["2026-07-30"]);
+  });
+
+  it("falls back to the whole page when <main> contains no dates", () => {
+    const html = "<main><h1>MPC dates</h1></main><div>Thursday 30 July 2026</div>";
+    expect(parseMpcDates(html)).toEqual(["2026-07-30"]);
+  });
+
+  it("rejects calendar-impossible dates like 31 September", () => {
+    const html = "<li>31 September 2026</li><li>17 September 2026</li>";
+    expect(parseMpcDates(html)).toEqual(["2026-09-17"]);
+  });
 });
 
 describe("nextMeeting / daysUntil", () => {

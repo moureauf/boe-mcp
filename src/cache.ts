@@ -1,4 +1,9 @@
-const DEFAULT_TTL_MS = (Number(process.env.BOE_CACHE_TTL_MINUTES) || 60) * 60 * 1000;
+// BOE_CACHE_TTL_MINUTES=0 is a valid setting (disable caching), so don't use
+// `||`; only fall back to 60 when the value is unset or not a number.
+function defaultTtlMs(): number {
+  const minutes = Number(process.env.BOE_CACHE_TTL_MINUTES);
+  return (Number.isFinite(minutes) && minutes >= 0 ? minutes : 60) * 60 * 1000;
+}
 
 interface CacheEntry<T> {
   data: T;
@@ -9,7 +14,7 @@ export class TTLCache<K, V extends object> {
   private store = new Map<K, CacheEntry<V>>();
   private ttlMs: number;
 
-  constructor(ttlMs = DEFAULT_TTL_MS) {
+  constructor(ttlMs = defaultTtlMs()) {
     this.ttlMs = ttlMs;
   }
 

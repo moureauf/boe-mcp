@@ -24,4 +24,10 @@ describe("monthsBetween (months-held arithmetic)", () => {
   it("never returns a negative count", () => {
     expect(monthsBetween("2026-08-01", new Date(Date.UTC(2026, 6, 6)))).toBe(0);
   });
+
+  it("clamps month-end anniversaries to shorter months (Jan 31 -> Feb 28 is 1 month)", () => {
+    expect(monthsBetween("2026-01-31", new Date(Date.UTC(2026, 1, 28)))).toBe(1);
+    expect(monthsBetween("2026-01-31", new Date(Date.UTC(2026, 1, 27)))).toBe(0);
+    expect(monthsBetween("2026-01-31", new Date(Date.UTC(2026, 3, 30)))).toBe(3);
+  });
 });

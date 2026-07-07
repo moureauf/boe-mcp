@@ -31,7 +31,7 @@ Add to your Claude Code `settings.json`:
 
 | Env var | Default | Description |
 |---------|---------|-------------|
-| `BOE_CACHE_TTL_MINUTES` | `60` | How long to cache BoE responses in memory |
+| `BOE_CACHE_TTL_MINUTES` | `60` | How long to cache BoE responses in memory (`0` disables caching) |
 
 ## Data sources
 

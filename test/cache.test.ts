@@ -48,6 +48,15 @@ describe("TTLCache", () => {
     expect("stale" in hit).toBe(false);
   });
 
+  it("treats a TTL of 0 as always-expired (caching disabled)", async () => {
+    const cache = new TTLCache<string, { v: number }>(0);
+    const fetcher = vi.fn().mockResolvedValueOnce({ v: 1 }).mockResolvedValueOnce({ v: 2 });
+    await cache.getOrFetch("k", fetcher);
+    vi.advanceTimersByTime(1);
+    expect(await cache.getOrFetch("k", fetcher)).toEqual({ v: 2 });
+    expect(fetcher).toHaveBeenCalledTimes(2);
+  });
+
   it("propagates the fetch error when there is no cached data", async () => {
     const cache = new TTLCache<string, { v: number }>(60_000);
     const fetcher = vi.fn().mockRejectedValue(new Error("network down"));

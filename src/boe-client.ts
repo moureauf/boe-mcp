@@ -29,6 +29,9 @@ function toIso(day: string, monthName: string, year: string): string | null {
   const month = monthNumber(monthName);
   const d = Number(day);
   if (month === null || !Number.isInteger(d) || d < 1 || d > 31) return null;
+  // round-trip through Date to reject calendar-impossible dates like 31 Feb
+  const parsed = new Date(Date.UTC(Number(year), month - 1, d));
+  if (parsed.getUTCMonth() !== month - 1 || parsed.getUTCDate() !== d) return null;
   return `${year}-${String(month).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 }
 
@@ -66,14 +69,16 @@ export function parseIadbCsv(csv: string): SeriesPoint[] {
   return points;
 }
 
-// The MPC dates page layout has changed over time, so don't rely on specific
-// markup: drop script/style content, strip tags, then pick up every
-// "5 February 2026"-style date in the visible text.
-export function parseMpcDates(html: string): string[] {
-  const text = html
+function visibleText(html: string): string {
+  return html
     .replace(/<script[\s\S]*?<\/script>/gi, " ")
     .replace(/<style[\s\S]*?<\/style>/gi, " ")
-    .replace(/<[^>]+>/g, " ");
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;|&#0*160;/gi, " ")
+    .replace(/&amp;/gi, "&");
+}
+
+function extractDates(text: string): string[] {
   const datePattern =
     /\b(\d{1,2})(?:st|nd|rd|th)?\s+(January|February|March|April|May|June|July|August|September|October|November|December)\s+(20\d{2})\b/gi;
   const dates = new Set<string>();
@@ -81,10 +86,24 @@ export function parseMpcDates(html: string): string[] {
     const iso = toIso(day, monthName, year);
     if (iso !== null) dates.add(iso);
   }
-  if (dates.size === 0) {
+  return [...dates].sort();
+}
+
+// The MPC dates page layout has changed over time, so don't rely on specific
+// markup: strip tags and pick up every "5 February 2026"-style date in the
+// visible text. To avoid picking up unrelated dates in navigation, teasers or
+// the footer, prefer the <main> content region when it exists and contains
+// dates; otherwise scan the whole page.
+export function parseMpcDates(html: string): string[] {
+  const main = /<main[\s>][\s\S]*?<\/main>/i.exec(html);
+  let dates = main ? extractDates(visibleText(main[0])) : [];
+  if (dates.length === 0) {
+    dates = extractDates(visibleText(html));
+  }
+  if (dates.length === 0) {
     throw new Error("No MPC dates found on the BoE upcoming-MPC-dates page");
   }
-  return [...dates].sort();
+  return dates;
 }
 
 async function fetchText(url: string, accept: string): Promise<string> {
