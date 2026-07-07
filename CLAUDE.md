@@ -1,13 +1,15 @@
 # boe-mcp
 
 TypeScript MCP server exposing Bank of England base rate data.
-Published to npm as `@moureauf/boe-mcp`.
+Published to npm as `boe-mcp`.
 
 ## Commands
 
 - `npm run build` — compile TypeScript to `dist/`
 - `npm run dev` — watch mode
 - `npm start` — run the server
+- `npm test` — unit tests (no network)
+- `npm run test:live` — integration smoke test against real BoE endpoints
 
 ## Architecture
 
@@ -21,10 +23,12 @@ src/
 index.ts          # server entry, tool registration
 boe-client.ts     # BoE API calls + CSV/HTML parsing
 cache.ts          # generic TTL cache
+data.ts           # shared cached accessors used by the tools
 tools/
     current-rate.ts
     rate-history.ts
     next-meeting.ts
+test/                 # vitest tests + fixtures (test/live/ hits the network)
 docs/specs/design.md  # full design spec — read this first
 
 ## Tools exposed

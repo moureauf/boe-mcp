@@ -1,5 +1,5 @@
 {
-  "name": "@moureauf/boe-mcp",
+  "name": "boe-mcp",
   "version": "0.1.0",
   "description": "MCP server exposing Bank of England base rate data",
   "type": "module",
@@ -9,7 +9,11 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:live": "vitest run --config vitest.live.config.ts",
+    "prepublishOnly": "npm run build"
   },
   "files": [
     "dist"
@@ -17,11 +21,24 @@
   "keywords": [
     "mcp",
     "bank-of-england",
-    "base-rate"
+    "interest-rates",
+    "claude"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moureauf/boe-mcp.git"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.0",
+    "zod": "^3.25.0"
+  },
   "devDependencies": {
     "@types/node": "^25.6.0",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^3.2.0"
   }
 }
