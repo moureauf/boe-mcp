@@ -3,10 +3,14 @@ on: [pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Floor and ceiling of the supported range (package.json engines >=18).
+        node-version: [18, 24]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20 }
+        with: { node-version: "${{ matrix.node-version }}" }
       - run: npm ci
       - run: npm run build
       - run: npm test

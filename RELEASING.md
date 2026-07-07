@@ -1,25 +1,44 @@
 # Releasing
 
-One-time setup:
+`boe-mcp` is published to npm by the `publish.yml` GitHub Actions workflow using
+**npm trusted publishing** (OIDC) — no `NPM_TOKEN` secret required. Every
+published version carries a provenance attestation.
 
-1. `npm login` (or verify with `npm whoami`).
-2. Create an npm **automation** token: `npm token create --type=automation` (or via npmjs.com → Access Tokens).
-3. Add it as the `NPM_TOKEN` secret in the GitHub repo: Settings → Secrets and variables → Actions → New repository secret.
+## One-time setup (already done for 0.1.0)
 
-Publishing 0.1.0 (version is already set in `package.json`):
+On npmjs.com, on the package page → **Settings → Trusted publisher**, add a
+GitHub Actions publisher:
+
+- Organization / user: `moureauf`
+- Repository: `boe-mcp`
+- Workflow filename: `publish.yml`
+- Environment: (leave blank)
+
+Once configured, the `NPM_TOKEN` secret can be deleted from the GitHub repo and
+the bootstrap token revoked on npm — the workflow authenticates via OIDC.
+
+## Cutting a release
+
+1. Bump `version` in `package.json` and the version passed to `McpServer` in
+   `src/index.ts` (keep them in sync), via a PR to `main`.
+2. Tag the merge commit and push the tag:
+
+   ```bash
+   git checkout main && git pull
+   git tag vX.Y.Z            # must match package.json version
+   git push origin vX.Y.Z
+   ```
+
+The tag push triggers `publish.yml`: install → build → test → `npm publish
+--provenance`. Watch it under the repo's **Actions** tab; the version appears at
+https://www.npmjs.com/package/boe-mcp. You can also run it from **Actions →
+Publish → Run workflow** (it publishes whatever version is in `package.json`).
+
+## Manual fallback (if Actions is unavailable)
 
 ```bash
-git checkout main && git pull        # after the PR is merged
-git tag v0.1.0
-git push origin v0.1.0
+npm ci && npm test && npm publish --provenance --access public
 ```
 
-The `publish.yml` workflow triggers on the tag push: it installs, builds, runs the unit tests, and runs `npm publish`. Watch it under the repo's Actions tab; the package appears at https://www.npmjs.com/package/boe-mcp.
-
-For subsequent releases: bump `version` in `package.json` (and the version passed to `McpServer` in `src/index.ts`), commit via PR, then tag `vX.Y.Z` matching the new version and push the tag.
-
-Manual fallback (if Actions is unavailable):
-
-```bash
-npm ci && npm test && npm publish
-```
+Requires `npm login` and, if your account enforces 2FA, either an OTP prompt or
+a granular token with 2FA bypass.
