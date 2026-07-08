@@ -4,7 +4,7 @@ on:
     tags: ["v*"]
   workflow_dispatch: # manual publish of the version in package.json
 jobs:
-  publish:
+  npm:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -23,12 +23,21 @@ jobs:
       # No NODE_AUTH_TOKEN: auth comes from the OIDC token via the trusted
       # publisher configured for this repo/workflow on npmjs.com.
       - run: npm publish --provenance --access public
-      # Publish the same version to the official MCP registry. Auth is via the
-      # same GitHub OIDC token (id-token: write above); the io.github.moureauf/*
-      # namespace is proven by this repo's owner. server.json must reference the
-      # version just published to npm — the version-sync test guarantees that.
+
+  # Separate job so a registry hiccup can't fail an already-successful npm
+  # publish, and can be re-run on its own ("Re-run failed jobs"). npm versions
+  # are immutable, so re-running the npm job would fail on a duplicate.
+  mcp-registry:
+    needs: npm
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # OIDC proves the io.github.moureauf/* namespace
+    steps:
+      - uses: actions/checkout@v7
       - name: Install mcp-publisher
-        run: curl -L "https://github.com/modelcontextprotocol/registry/releases/download/latest/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+        # -f so an HTTP error fails here instead of piping an error page to tar.
+        run: curl -fsSL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher
       - name: Publish to MCP registry
         run: |
           ./mcp-publisher login github-oidc
