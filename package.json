@@ -42,7 +42,7 @@
     "url": "git+https://github.com/moureauf/boe-mcp.git"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.17.0",
