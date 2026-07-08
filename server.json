@@ -1,0 +1,21 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.moureauf/boe-mcp",
+  "description": "Bank of England base rate data (current rate, rate history, rate on a date, next MPC meeting) over stdio.",
+  "version": "0.1.1",
+  "repository": {
+    "url": "https://github.com/moureauf/boe-mcp",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "boe-mcp",
+      "version": "0.1.1",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
