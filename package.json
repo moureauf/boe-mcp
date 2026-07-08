@@ -1,8 +1,14 @@
 {
   "name": "boe-mcp",
   "version": "0.1.0",
-  "description": "MCP server exposing Bank of England base rate data",
+  "description": "MCP server exposing Bank of England base rate data (base rate, rate history, next MPC meeting) over stdio",
   "type": "module",
+  "mcpName": "io.github.moureauf/boe-mcp",
+  "author": "Francois Moureau",
+  "homepage": "https://github.com/moureauf/boe-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/moureauf/boe-mcp/issues"
+  },
   "bin": {
     "boe-mcp": "dist/index.js"
   },
@@ -20,8 +26,14 @@
   ],
   "keywords": [
     "mcp",
+    "model-context-protocol",
     "bank-of-england",
+    "boe",
     "interest-rates",
+    "base-rate",
+    "monetary-policy",
+    "mpc",
+    "uk-economy",
     "claude"
   ],
   "license": "MIT",
