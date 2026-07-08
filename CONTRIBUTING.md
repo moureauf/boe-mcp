@@ -82,7 +82,8 @@ The version lives in **four** places and must stay in sync — the
 - `src/index.ts` → `new McpServer({ version })`
 - `server.json` → `version` **and** `packages[0].version`
 
-Bump all of them in the release PR. Use semver; pre-1.0 we treat user-visible
+Bump all of them in the release PR, and add a matching entry to
+[`CHANGELOG.md`](CHANGELOG.md). Use semver; pre-1.0 we treat user-visible
 changes (new tools, dropped Node versions) as minor and fixes as patch.
 
 ## Releasing
