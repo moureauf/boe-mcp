@@ -20,8 +20,9 @@ the bootstrap token revoked on npm — the workflow authenticates via OIDC.
 ## Cutting a release
 
 1. Bump `version` in `package.json`, the version passed to `McpServer` in
-   `src/index.ts`, and both `version` fields in `server.json` — via a PR to
-   `main`. The `version is in sync` test fails if any of these drift.
+   `src/index.ts`, and both `version` fields in `server.json`, and add a
+   `CHANGELOG.md` entry — via a PR to `main`. The `version is in sync` test
+   fails if any of the version locations drift.
 2. Tag the merge commit and push the tag:
 
    ```bash
