@@ -5,8 +5,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # Floor and ceiling of the supported range (package.json engines >=18).
-        node-version: [18, 24]
+        # Floor and ceiling of the supported range (package.json engines >=20).
+        node-version: [20, 24]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
