@@ -19,8 +19,9 @@ the bootstrap token revoked on npm — the workflow authenticates via OIDC.
 
 ## Cutting a release
 
-1. Bump `version` in `package.json` and the version passed to `McpServer` in
-   `src/index.ts` (keep them in sync), via a PR to `main`.
+1. Bump `version` in `package.json`, the version passed to `McpServer` in
+   `src/index.ts`, and both `version` fields in `server.json` — via a PR to
+   `main`. The `version is in sync` test fails if any of these drift.
 2. Tag the merge commit and push the tag:
 
    ```bash
@@ -33,6 +34,19 @@ The tag push triggers `publish.yml`: install → build → test → `npm publish
 --provenance`. Watch it under the repo's **Actions** tab; the version appears at
 https://www.npmjs.com/package/boe-mcp. You can also run it from **Actions →
 Publish → Run workflow** (it publishes whatever version is in `package.json`).
+
+## Listing on the official MCP registry
+
+`server.json` (repo root) is the manifest for the [official MCP registry](https://github.com/modelcontextprotocol/registry). After the matching npm version is published (the registry verifies ownership via the `mcpName` field in `package.json`):
+
+```bash
+# one-time: install the CLI, then authenticate for the io.github.moureauf/* namespace
+mcp-publisher login github
+# publish the manifest (run mcp-publisher init first to regenerate if the schema has moved)
+mcp-publisher publish
+```
+
+Re-run `mcp-publisher publish` after each release so the registry points at the current version.
 
 ## Manual fallback (if Actions is unavailable)
 
