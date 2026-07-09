@@ -15,6 +15,7 @@ Part of a planned family of UK macro data MCPs (`boe-mcp`, `ons-mcp`) built as i
 |------|-------------|
 | `get_current_rate` | Current base rate, effective date, months held at current level |
 | `get_rate_history` | Last N rate changes — date, rate, direction, basis points moved. Default N=10, configurable by caller |
+| `get_rate_at` | Base rate in force on a given historical date |
 | `get_next_mpc_meeting` | Date of next scheduled MPC meeting and days until it |
 
 ---
@@ -81,8 +82,10 @@ boe-mcp/
 │   ├── tools/
 │   │   ├── current-rate.ts    # get_current_rate tool handler
 │   │   ├── rate-history.ts    # get_rate_history tool handler
+│   │   ├── rate-at.ts         # get_rate_at tool handler
 │   │   └── next-meeting.ts    # get_next_mpc_meeting tool handler
 │   ├── boe-client.ts          # BoE API calls + CSV/HTML parsing
+│   ├── data.ts                # shared cached accessors used by the tools
 │   └── cache.ts               # Generic TTL cache
 ├── dist/                      # Compiled output (gitignored)
 ├── package.json               # bin entry → dist/index.js

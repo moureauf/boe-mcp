@@ -22,7 +22,17 @@ jobs:
       - run: npm test
       # No NODE_AUTH_TOKEN: auth comes from the OIDC token via the trusted
       # publisher configured for this repo/workflow on npmjs.com.
-      - run: npm publish --provenance --access public
+      # npm versions are immutable; skip if this version is already published so
+      # re-running the workflow (e.g. after re-tagging to recover a release that
+      # failed later on) doesn't hard-fail here. The mcp-registry job still runs.
+      - name: Publish to npm (skip if this version already exists)
+        run: |
+          version=$(node -p "require('./package.json').version")
+          if npm view "boe-mcp@$version" version >/dev/null 2>&1; then
+            echo "boe-mcp@$version is already on npm — skipping publish."
+          else
+            npm publish --provenance --access public
+          fi
 
   # Separate job so a registry hiccup can't fail an already-successful npm
   # publish, and can be re-run on its own ("Re-run failed jobs"). npm versions
