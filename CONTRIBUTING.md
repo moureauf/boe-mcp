@@ -65,6 +65,10 @@ Repo convention: **write the test first**, then implement (see existing
 3. Open a PR. CI (`.github/workflows/ci.yml`) runs build + tests on Node 20 & 24.
 4. Squash-merge once green.
 
+`main` is protected: it requires a pull request and the CI checks
+**`build (20)`** and **`build (24)`** to pass before merging, so a red PR
+cannot be merged.
+
 ### Adding a new tool or data series
 
 The architecture is built so this is additive. A new IADB series is just a new
