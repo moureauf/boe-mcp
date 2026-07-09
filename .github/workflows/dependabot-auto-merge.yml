@@ -1,0 +1,29 @@
+name: Dependabot auto-merge
+# Enables auto-merge on Dependabot PRs for patch and minor updates. GitHub then
+# merges them once the required CI checks (build (20) / build (24)) pass. Major
+# updates are intentionally left for manual review — see the zod 3->4 bump,
+# which needed real testing before it was safe.
+#
+# Requires: "Allow auto-merge" enabled (Settings -> General -> Pull Requests)
+# and branch protection with required status checks on main (otherwise there is
+# nothing to wait for and the PR would merge immediately).
+on: pull_request
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Dependabot metadata
+        id: meta
+        uses: dependabot/fetch-metadata@v2
+      - name: Enable auto-merge for patch and minor updates
+        if: steps.meta.outputs.update-type == 'version-update:semver-patch' || steps.meta.outputs.update-type == 'version-update:semver-minor'
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

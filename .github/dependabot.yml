@@ -3,11 +3,20 @@ updates:
   - package-ecosystem: npm
     directory: /
     schedule:
-      interval: weekly
+      interval: daily
+    open-pull-requests-limit: 10
     groups:
-      dev-dependencies:
+      # Dev deps and non-major runtime bumps are grouped into one PR each to
+      # cut noise; major runtime bumps get their own PR so they can be reviewed.
+      npm-development:
         dependency-type: development
+      npm-production:
+        dependency-type: production
+        update-types: [minor, patch]
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
+      interval: daily
+    groups:
+      github-actions:
+        patterns: ["*"]
