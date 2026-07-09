@@ -51,13 +51,23 @@ export function iadbCsvUrl(seriesCode: string, from = "01/Jan/1975"): string {
 
 // IADB CSV rows look like `18 Dec 2025,3.7500` under a `DATE,<CODE>` header.
 // Parse defensively: tolerate quotes and whitespace, skip anything malformed.
+// Split on the first comma and validate each field with simple, unambiguous
+// regexes rather than one whitespace-tolerant pattern (whose adjacent optional
+// whitespace groups backtrack quadratically on untrusted input).
+const DATE_FIELD = /^(\d{1,2})\s+([A-Za-z]{3,9})\s+(\d{4})$/;
+const NUMBER_FIELD = /^-?\d+(?:\.\d+)?$/;
+const unquote = (field: string): string => field.trim().replace(/^"(.*)"$/, "$1").trim();
+
 export function parseIadbCsv(csv: string): SeriesPoint[] {
-  const rowPattern = /^"?\s*(\d{1,2})\s+([A-Za-z]{3,9})\s+(\d{4})\s*"?\s*,\s*"?\s*(-?\d+(?:\.\d+)?)\s*"?\s*$/;
   const points: SeriesPoint[] = [];
   for (const line of csv.split(/\r?\n/)) {
-    const match = rowPattern.exec(line.trim());
+    const comma = line.indexOf(",");
+    if (comma === -1) continue;
+    const match = DATE_FIELD.exec(unquote(line.slice(0, comma)));
     if (!match) continue;
-    const [, day, monthName, year, value] = match;
+    const value = unquote(line.slice(comma + 1));
+    if (!NUMBER_FIELD.test(value)) continue;
+    const [, day, monthName, year] = match;
     const date = toIso(day, monthName, year);
     if (date === null) continue;
     points.push({ date, value: Number(value) });
