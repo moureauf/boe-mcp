@@ -15,8 +15,11 @@ jobs:
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
-      # Trusted publishing needs npm >= 11.5.1; Node 24's bundled npm can lag it.
-      - run: npm install -g npm@latest
+      # Use the npm bundled with Node 24 (>= 11.5.1, which trusted publishing
+      # needs). We deliberately do NOT `npm install -g npm@latest`: a broken
+      # latest once shipped without its `sigstore` dep, failing
+      # `npm publish --provenance` with "Cannot find module 'sigstore'".
+      - run: npm --version
       - run: npm ci
       - run: npm run build
       - run: npm test
