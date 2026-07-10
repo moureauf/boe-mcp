@@ -10,6 +10,8 @@ Published to npm as `boe-mcp`.
 - `npm start` — run the server
 - `npm test` — unit tests (no network)
 - `npm run test:live` — integration smoke test against real BoE endpoints
+- `npm run lint` — check formatting/lint rules (Biome)
+- `npm run lint:fix` — apply Biome fixes
 
 ## Architecture
 
@@ -27,6 +29,7 @@ data.ts           # shared cached accessors used by the tools
 tools/
     current-rate.ts
     rate-history.ts
+    rate-at.ts
     next-meeting.ts
 test/                 # vitest tests + fixtures (test/live/ hits the network)
 docs/specs/design.md  # full design spec — read this first
@@ -51,7 +54,7 @@ npx @modelcontextprotocol/inspector node dist/index.js
 - Always work on a feature branch and open a PR
 
 ## Workflow
-- Before implementing any file or feature, propose a plan and wait for approval
+- In interactive sessions, propose a plan before implementing substantial new features; in autonomous sessions, proceed once the task is agreed
 - Write tests before implementation (create the test file first, then implement)
 - After wiring up a new tool in index.ts, smoke test with:
 `npx @modelcontextprotocol/inspector node dist/index.js`
