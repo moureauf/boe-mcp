@@ -1,5 +1,5 @@
 import { BANK_RATE_SERIES, getSeries } from "../data.js";
-import { toRateEntries, type RateEntry } from "./rate-history.js";
+import { type RateEntry, toRateEntries } from "./rate-history.js";
 
 export interface RateAt {
   date: string; // the queried ISO 8601 date

@@ -3,11 +3,11 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { getCurrentRate } from "./tools/current-rate.js";
-import { DEFAULT_HISTORY_LIMIT, getRateHistory } from "./tools/rate-history.js";
 import { getNextMpcMeeting } from "./tools/next-meeting.js";
 import { getRateAt } from "./tools/rate-at.js";
+import { DEFAULT_HISTORY_LIMIT, getRateHistory } from "./tools/rate-history.js";
 
-const server = new McpServer({ name: "boe-mcp", version: "0.1.3" });
+const server = new McpServer({ name: "boe-mcp", version: "0.1.3" }); // x-release-please-version
 
 type ToolResult = {
   content: { type: "text"; text: string }[];

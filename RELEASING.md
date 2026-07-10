@@ -19,35 +19,29 @@ the bootstrap token revoked on npm — the workflow authenticates via OIDC.
 
 ## Cutting a release
 
-1. Bump `version` in `package.json`, the version passed to `McpServer` in
-   `src/index.ts`, and both `version` fields in `server.json`, and add a
-   `CHANGELOG.md` entry — via a PR to `main`. The `version is in sync` test
-   fails if any of the version locations drift.
-2. Tag the merge commit and push the tag:
+Versioning and the changelog are automated by
+[release-please](https://github.com/googleapis/release-please) (`.github/workflows/release-please.yml`),
+driven by [Conventional Commits](https://www.conventionalcommits.org) in PR
+titles / commit messages (`fix:` → patch, `feat:` → minor, `feat!:`/`BREAKING
+CHANGE` → major).
 
-   ```bash
-   git checkout main && git pull
-   git tag vX.Y.Z            # must match package.json version
-   git push origin vX.Y.Z
-   ```
+1. Land your changes on `main` with conventional-commit messages.
+2. release-please keeps an open **"chore: release X.Y.Z"** PR that bumps the
+   version everywhere (`package.json`, `src/index.ts`, both fields in
+   `server.json`) and updates `CHANGELOG.md`. Review and **merge it** — that
+   creates the `vX.Y.Z` git tag and GitHub release.
+3. **Publish:** go to **Actions → Publish → Run workflow** (on `main`). It
+   builds, tests, `npm publish --provenance`, and publishes `server.json` to the
+   MCP registry. (Publishing is a deliberate manual step; the guard skips npm if
+   the version is already there.)
 
-The tag push triggers `publish.yml`: install → build → test → `npm publish
---provenance`. Watch it under the repo's **Actions** tab; the version appears at
-https://www.npmjs.com/package/boe-mcp. You can also run it from **Actions →
-Publish → Run workflow** (it publishes whatever version is in `package.json`).
+The `version is in sync` test guards against the four version locations drifting
+if you ever bump by hand. Pushing a `vX.Y.Z` tag manually also triggers
+`publish.yml`, so a hand-cut release still works.
 
-## Listing on the official MCP registry
-
-`server.json` (repo root) is the manifest for the [official MCP registry](https://github.com/modelcontextprotocol/registry). After the matching npm version is published (the registry verifies ownership via the `mcpName` field in `package.json`):
-
-```bash
-# one-time: install the CLI, then authenticate for the io.github.moureauf/* namespace
-mcp-publisher login github
-# publish the manifest (run mcp-publisher init first to regenerate if the schema has moved)
-mcp-publisher publish
-```
-
-Re-run `mcp-publisher publish` after each release so the registry points at the current version.
+The MCP registry publish is automated inside `publish.yml` (the `mcp-registry`
+job, via `mcp-publisher` + GitHub OIDC), so no separate step is needed. To
+publish the registry manifest by hand: `mcp-publisher login github && mcp-publisher publish`.
 
 ## Manual fallback (if Actions is unavailable)
 
