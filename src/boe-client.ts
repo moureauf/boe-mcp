@@ -51,23 +51,13 @@ export function iadbCsvUrl(seriesCode: string, from = "01/Jan/1975"): string {
 
 // IADB CSV rows look like `18 Dec 2025,3.7500` under a `DATE,<CODE>` header.
 // Parse defensively: tolerate quotes and whitespace, skip anything malformed.
-// Split on the first comma and validate each field with simple, unambiguous
-// regexes rather than one whitespace-tolerant pattern (whose adjacent optional
-// whitespace groups backtrack quadratically on untrusted input).
-const DATE_FIELD = /^(\d{1,2})\s+([A-Za-z]{3,9})\s+(\d{4})$/;
-const NUMBER_FIELD = /^-?\d+(?:\.\d+)?$/;
-const unquote = (field: string): string => field.trim().replace(/^"(.*)"$/, "$1").trim();
-
 export function parseIadbCsv(csv: string): SeriesPoint[] {
+  const rowPattern = /^"?\s*(\d{1,2})\s+([A-Za-z]{3,9})\s+(\d{4})\s*"?\s*,\s*"?\s*(-?\d+(?:\.\d+)?)\s*"?\s*$/;
   const points: SeriesPoint[] = [];
   for (const line of csv.split(/\r?\n/)) {
-    const comma = line.indexOf(",");
-    if (comma === -1) continue;
-    const match = DATE_FIELD.exec(unquote(line.slice(0, comma)));
+    const match = rowPattern.exec(line.trim());
     if (!match) continue;
-    const value = unquote(line.slice(comma + 1));
-    if (!NUMBER_FIELD.test(value)) continue;
-    const [, day, monthName, year] = match;
+    const [, day, monthName, year, value] = match;
     const date = toIso(day, monthName, year);
     if (date === null) continue;
     points.push({ date, value: Number(value) });
@@ -81,8 +71,10 @@ export function parseIadbCsv(csv: string): SeriesPoint[] {
 
 function visibleText(html: string): string {
   return html
-    .replace(/<script[\s\S]*?<\/script>/gi, " ")
-    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    // `\s*` before the closing `>` so crafted end tags like `</script >` or
+    // `</style\n>` are still stripped (CodeQL js/bad-tag-filter).
+    .replace(/<script[\s\S]*?<\/script\s*>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style\s*>/gi, " ")
     .replace(/<[^>]+>/g, " ")
     .replace(/&nbsp;|&#0*160;/gi, " ")
     .replace(/&amp;/gi, "&");

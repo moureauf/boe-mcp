@@ -26,6 +26,14 @@ describe("parseMpcDates", () => {
     expect(dates).not.toContain("2020-01-01");
   });
 
+  it("strips script/style even with whitespace in the end tag", () => {
+    const html =
+      "<main><li>Thursday 30 July 2026</li>" +
+      "<script>var d = '1 January 2020';</script >" +
+      "<style>x { y: 2 February 2020 }</style\n></main>";
+    expect(parseMpcDates(html)).toEqual(["2026-07-30"]);
+  });
+
   it("deduplicates repeated dates", () => {
     const html = "<p>Thursday 5 February 2026</p><p>5 February 2026</p>";
     expect(parseMpcDates(html)).toEqual(["2026-02-05"]);
