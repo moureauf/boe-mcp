@@ -1,6 +1,6 @@
 {
   "name": "boe-mcp",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "MCP server exposing Bank of England base rate data (base rate, rate history, next MPC meeting) over stdio",
   "type": "module",
   "mcpName": "io.github.moureauf/boe-mcp",
