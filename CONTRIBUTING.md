@@ -61,13 +61,21 @@ Repo convention: **write the test first**, then implement (see existing
 ## Making a change
 
 1. Branch off `main` (never commit to `main` directly).
-2. Add/adjust tests, implement, `npm run build && npm test`.
-3. Open a PR. CI (`.github/workflows/ci.yml`) runs build + tests on Node 20 & 24.
-4. Squash-merge once green.
+2. Add/adjust tests, implement, `npm run build && npm test && npm run lint`.
+3. Open a PR with a [Conventional Commits](https://www.conventionalcommits.org)
+   title (`fix:`, `feat:`, `chore:`, `docs:` …) — release-please uses it to
+   decide the next version and changelog entry. CI
+   (`.github/workflows/ci.yml`) runs build + tests on Node 20 & 24 and Biome
+   lint.
+4. Squash-merge once green (the PR title becomes the squash commit message).
 
 `main` is protected: it requires a pull request and the CI checks
 **`build (20)`** and **`build (24)`** to pass before merging, so a red PR
-cannot be merged.
+cannot be merged. (You can also add `lint` as a required check.)
+
+Lint/format is [Biome](https://biomejs.dev): `npm run lint` to check,
+`npm run lint:fix` to auto-fix (import order etc.). The formatter is off — Biome
+is used for linting only.
 
 ### Adding a new tool or data series
 
@@ -79,51 +87,45 @@ row to the tools table in `README.md`.
 
 ## Versioning
 
-The version lives in **four** places and must stay in sync — the
-`version is in sync` test in `test/version-sync.test.ts` fails otherwise:
+The version lives in **four** places and is kept in sync automatically by
+release-please (and guarded by the `version is in sync` test in
+`test/version-sync.test.ts`):
 
 - `package.json` → `version`
-- `src/index.ts` → `new McpServer({ version })`
+- `src/index.ts` → `new McpServer({ version })` (marked `x-release-please-version`)
 - `server.json` → `version` **and** `packages[0].version`
 
-Bump all of them in the release PR, and add a matching entry to
-[`CHANGELOG.md`](CHANGELOG.md). Use semver; pre-1.0 we treat user-visible
-changes (new tools, dropped Node versions) as minor and fixes as patch.
+You don't bump these by hand — release-please does it in the release PR based on
+your conventional-commit messages. Semver: `fix:` → patch, `feat:` → minor,
+`feat!:` / `BREAKING CHANGE:` → major.
 
 ## Releasing
 
-Full pipeline, one tag. After the version-bump PR is merged to `main`:
+Version bump + changelog are automated by
+[release-please](https://github.com/googleapis/release-please); publishing is a
+manual button. In short:
 
-```bash
-git checkout main && git pull
-git tag vX.Y.Z            # must equal package.json version
-git push origin vX.Y.Z
-```
+1. Merge PRs to `main` with conventional-commit titles.
+2. release-please maintains a **"chore: release X.Y.Z"** PR — merge it to create
+   the `vX.Y.Z` tag + GitHub release.
+3. **Actions → Publish → Run workflow** publishes to npm (trusted publishing +
+   provenance) and the MCP registry.
 
-Pushing the tag triggers [`.github/workflows/publish.yml`](.github/workflows/publish.yml),
-which:
+Full details, including the one-time trusted-publisher setup and manual
+fallbacks, are in [`RELEASING.md`](RELEASING.md).
 
-1. builds + tests,
-2. publishes to **npm** via [trusted publishing](https://docs.npmjs.com/trusted-publishers/)
-   (OIDC — no token) with a build **provenance** attestation, then
-3. publishes the same version to the **official MCP registry** with
-   `mcp-publisher` (OIDC again — the `io.github.moureauf/*` namespace is proven
-   by repo ownership).
-
-You can also run it from Actions → Publish → Run workflow (it ships whatever
-version is in `package.json`). See [`RELEASING.md`](RELEASING.md) for the
-one-time trusted-publisher setup and a manual fallback.
-
-> Versions are immutable on both npm and the MCP registry: you cannot re-publish
-> an existing version. Always bump before releasing; re-running publish for a
-> version that already shipped will fail (expected).
+> Versions are immutable on both npm and the MCP registry. release-please always
+> bumps first; the publish workflow's guard safely skips npm if the version is
+> already there.
 
 ## How the pieces connect
 
 ```
-GitHub repo ──(git tag v*)──▶ publish.yml
-                                  ├──▶ npm registry      (boe-mcp, with provenance → links back to this repo/commit)
-                                  └──▶ MCP registry       (io.github.moureauf/boe-mcp → points at the npm package)
+commits (Conventional Commits) ──▶ release-please PR ──(merge)──▶ vX.Y.Z tag + release
+                                                                         │
+                                              Actions ▸ Publish ◀────────┘ (manual)
+                                                  ├──▶ npm registry   (boe-mcp, with provenance → this repo/commit)
+                                                  └──▶ MCP registry    (io.github.moureauf/boe-mcp → the npm package)
 ```
 
 - **npm** hosts the runnable package (`npx -y boe-mcp`); provenance ties each

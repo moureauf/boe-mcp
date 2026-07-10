@@ -1,0 +1,20 @@
+name: release-please
+# Maintains a release PR that bumps the version (package.json, src/index.ts,
+# server.json) and updates CHANGELOG.md from conventional-commit messages.
+# Merging that PR creates the vX.Y.Z tag + GitHub release. Publishing stays
+# manual: after the release is created, run the Publish workflow
+# (Actions -> Publish -> Run workflow).
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json

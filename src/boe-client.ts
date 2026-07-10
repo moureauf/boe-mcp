@@ -76,7 +76,7 @@ export function parseIadbCsv(csv: string): SeriesPoint[] {
 // bad-tag-filter query flags.
 function stripElement(html: string, tag: "script" | "style"): string {
   const lower = html.toLowerCase();
-  const open = "<" + tag;
+  const open = `<${tag}`;
   let out = "";
   let i = 0;
   for (;;) {
@@ -90,7 +90,7 @@ function stripElement(html: string, tag: "script" | "style"): string {
       continue;
     }
     out += html.slice(i, start) + " ";
-    const closeStart = lower.indexOf("</" + tag, start);
+    const closeStart = lower.indexOf(`</${tag}`, start);
     if (closeStart < 0) return out; // unterminated block: drop the rest
     const closeEnd = html.indexOf(">", closeStart);
     i = closeEnd < 0 ? html.length : closeEnd + 1;
