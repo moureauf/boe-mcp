@@ -7,7 +7,7 @@ import { DEFAULT_HISTORY_LIMIT, getRateHistory } from "./tools/rate-history.js";
 import { getNextMpcMeeting } from "./tools/next-meeting.js";
 import { getRateAt } from "./tools/rate-at.js";
 
-const server = new McpServer({ name: "boe-mcp", version: "0.1.2" });
+const server = new McpServer({ name: "boe-mcp", version: "0.1.3" });
 
 type ToolResult = {
   content: { type: "text"; text: string }[];

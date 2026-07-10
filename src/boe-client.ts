@@ -69,10 +69,36 @@ export function parseIadbCsv(csv: string): SeriesPoint[] {
   return points;
 }
 
+// Remove <script>/<style> blocks so date-like text inside them is never
+// harvested. Done with a linear scan rather than a regex: matching HTML end
+// tags with a regex is both ReDoS-prone and error-prone (browsers accept
+// junk end tags like `</script\n bar>`), which is exactly what CodeQL's
+// bad-tag-filter query flags.
+function stripElement(html: string, tag: "script" | "style"): string {
+  const lower = html.toLowerCase();
+  const open = "<" + tag;
+  let out = "";
+  let i = 0;
+  for (;;) {
+    const start = lower.indexOf(open, i);
+    if (start < 0) return out + html.slice(i);
+    const boundary = lower[start + open.length] ?? "";
+    // require a tag boundary so e.g. <scripting> isn't treated as <script>
+    if (boundary !== "" && !" \t\n\r\f/>".includes(boundary)) {
+      out += html.slice(i, start + open.length);
+      i = start + open.length;
+      continue;
+    }
+    out += html.slice(i, start) + " ";
+    const closeStart = lower.indexOf("</" + tag, start);
+    if (closeStart < 0) return out; // unterminated block: drop the rest
+    const closeEnd = html.indexOf(">", closeStart);
+    i = closeEnd < 0 ? html.length : closeEnd + 1;
+  }
+}
+
 function visibleText(html: string): string {
-  return html
-    .replace(/<script[\s\S]*?<\/script>/gi, " ")
-    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+  return stripElement(stripElement(html, "script"), "style")
     .replace(/<[^>]+>/g, " ")
     .replace(/&nbsp;|&#0*160;/gi, " ")
     .replace(/&amp;/gi, "&");
