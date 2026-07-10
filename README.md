@@ -4,6 +4,7 @@
 [![CI](https://github.com/moureauf/boe-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/moureauf/boe-mcp/actions/workflows/ci.yml)
 [![node](https://img.shields.io/node/v/boe-mcp)](https://www.npmjs.com/package/boe-mcp)
 [![license](https://img.shields.io/npm/l/boe-mcp)](./LICENSE)
+[![MCP Registry](https://img.shields.io/badge/MCP_Registry-io.github.moureauf%2Fboe--mcp-blue)](https://registry.modelcontextprotocol.io/v0/servers?search=io.github.moureauf/boe-mcp)
 
 An MCP (Model Context Protocol) server that gives Claude Code — or any MCP client — live Bank of England base rate data: the current rate and how long it has been held, the history of recent rate changes, and the date of the next Monetary Policy Committee announcement. It runs over stdio, needs no API key or configuration, and caches responses in memory so repeated questions don't re-hit the BoE.
 
@@ -34,6 +35,66 @@ Add to your Claude Code `settings.json`:
   }
 }
 ```
+
+Or use the CLI:
+
+```bash
+claude mcp add boe -- npx -y boe-mcp
+```
+
+<details>
+<summary>Claude Desktop</summary>
+
+Add to `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "boe": {
+      "command": "npx",
+      "args": ["-y", "boe-mcp"]
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary>Cursor</summary>
+
+Add to `~/.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "boe": {
+      "command": "npx",
+      "args": ["-y", "boe-mcp"]
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary>VS Code</summary>
+
+Add to `.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "boe": {
+      "command": "npx",
+      "args": ["-y", "boe-mcp"]
+    }
+  }
+}
+```
+
+</details>
 
 ## Configuration
 
