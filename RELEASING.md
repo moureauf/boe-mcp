@@ -25,6 +25,14 @@ driven by [Conventional Commits](https://www.conventionalcommits.org) in PR
 titles / commit messages (`fix:` → patch, `feat:` → minor, `feat!:`/`BREAKING
 CHANGE` → major).
 
+> **One-time setup:** release-please opens its release PR using the built-in
+> `GITHUB_TOKEN`, which requires **Settings → Actions → General → Workflow
+> permissions → "Allow GitHub Actions to create and approve pull requests"** to
+> be enabled. Without it the workflow fails with *"GitHub Actions is not
+> permitted to create or approve pull requests."* The release-please workflow
+> also has a `workflow_dispatch` trigger, so you can re-run it from
+> **Actions → release-please → Run workflow** after changing the setting.
+
 1. Land your changes on `main` with conventional-commit messages.
 2. release-please keeps an open **"chore: release X.Y.Z"** PR that bumps the
    version everywhere (`package.json`, `src/index.ts`, both fields in
