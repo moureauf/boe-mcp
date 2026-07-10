@@ -1,0 +1,26 @@
+name: CodeQL
+# Static analysis for security issues. Runs on PRs, on push to main, and
+# weekly to catch newly-disclosed query patterns even without code changes.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * 3" # Wednesdays 06:00 UTC
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: javascript-typescript
+      - uses: github/codeql-action/analyze@v4
