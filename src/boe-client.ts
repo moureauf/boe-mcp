@@ -69,14 +69,36 @@ export function parseIadbCsv(csv: string): SeriesPoint[] {
   return points;
 }
 
+// Remove <script>/<style> blocks so date-like text inside them is never
+// harvested. Done with a linear scan rather than a regex: matching HTML end
+// tags with a regex is both ReDoS-prone and error-prone (browsers accept
+// junk end tags like `</script\n bar>`), which is exactly what CodeQL's
+// bad-tag-filter query flags.
+function stripElement(html: string, tag: "script" | "style"): string {
+  const lower = html.toLowerCase();
+  const open = "<" + tag;
+  let out = "";
+  let i = 0;
+  for (;;) {
+    const start = lower.indexOf(open, i);
+    if (start < 0) return out + html.slice(i);
+    const boundary = lower[start + open.length] ?? "";
+    // require a tag boundary so e.g. <scripting> isn't treated as <script>
+    if (boundary !== "" && !" \t\n\r\f/>".includes(boundary)) {
+      out += html.slice(i, start + open.length);
+      i = start + open.length;
+      continue;
+    }
+    out += html.slice(i, start) + " ";
+    const closeStart = lower.indexOf("</" + tag, start);
+    if (closeStart < 0) return out; // unterminated block: drop the rest
+    const closeEnd = html.indexOf(">", closeStart);
+    i = closeEnd < 0 ? html.length : closeEnd + 1;
+  }
+}
+
 function visibleText(html: string): string {
-  return html
-    // Strip <script>/<style> blocks. The body is matched with an unrolled loop
-    // (`[^<]*(?:(?!</tag)<[^<]*)*`) so there are no overlapping quantifiers to
-    // backtrack (no ReDoS), and the end tag allows whitespace before `>` so
-    // crafted tags like `</script >` are still matched (CodeQL js/bad-tag-filter).
-    .replace(/<script\b[^<]*(?:(?!<\/script)<[^<]*)*<\/script\s*>/gi, " ")
-    .replace(/<style\b[^<]*(?:(?!<\/style)<[^<]*)*<\/style\s*>/gi, " ")
+  return stripElement(stripElement(html, "script"), "style")
     .replace(/<[^>]+>/g, " ")
     .replace(/&nbsp;|&#0*160;/gi, " ")
     .replace(/&amp;/gi, "&");

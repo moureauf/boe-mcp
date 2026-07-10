@@ -26,12 +26,17 @@ describe("parseMpcDates", () => {
     expect(dates).not.toContain("2020-01-01");
   });
 
-  it("strips script/style even with whitespace end tags or '<' in the body", () => {
+  it("strips script/style with junk end tags or '<' in the body", () => {
     const html =
       "<main><li>Thursday 30 July 2026</li>" +
-      "<script>if (a < b) d = '1 January 2020';</script >" +
+      "<script>if (a < b) d = '1 January 2020';</script\t\n bar>" +
       "<style>x { y: 2 February 2020 }</style\n></main>";
     expect(parseMpcDates(html)).toEqual(["2026-07-30"]);
+  });
+
+  it("does not treat <scripting> as a <script> tag", () => {
+    const html = "<main><scripting>5 November 2026</scripting></main>";
+    expect(parseMpcDates(html)).toEqual(["2026-11-05"]);
   });
 
   it("deduplicates repeated dates", () => {
