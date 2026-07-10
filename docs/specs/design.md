@@ -17,6 +17,8 @@ Part of a planned family of UK macro data MCPs (`boe-mcp`, `ons-mcp`) built as i
 | `get_rate_history` | Last N rate changes — date, rate, direction, basis points moved. Default N=10, configurable by caller |
 | `get_rate_at` | Base rate in force on a given historical date |
 | `get_next_mpc_meeting` | Date of next scheduled MPC meeting and days until it |
+| `list_series` | Curated catalog of well-known IADB series (code, name, description, unit, frequency) plus a note that `get_series` accepts any code |
+| `get_series` | Observations for any IADB series by code, with optional `from`/`to` date filtering and a `limit` on the most recent points |
 
 ---
 
@@ -126,6 +128,7 @@ No API keys, no environment variables required for basic use.
 
 The architecture is intentionally open to extension without structural change:
 
+- ✅ **Generic IADB series access** (implemented): `get_series` fetches any IADB series by code, and `list_series` exposes a curated catalog of well-known series (policy rates, market rates, FX, household rates). The series code was always configuration (`iadbCsvUrl` / the per-code `getSeries` cache accessor), so this was additive — no structural change. Adding a series to the catalog is now a one-line entry in `src/series-catalog.ts`; the live test verifies every catalogued code still resolves.
 - **Additional BoE series** (mortgage approvals, exchange rates, gilt yields): add a series code and a new tool file
 - **MPC vote breakdowns / meeting minutes**: add an HTML parser for BoE minutes pages
 - **ONS data** (CPI, GDP): separate `ons-mcp` package following the same pattern
