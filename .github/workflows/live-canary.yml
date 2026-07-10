@@ -8,6 +8,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  issues: write
 jobs:
   live:
     runs-on: ubuntu-latest
@@ -17,3 +18,53 @@ jobs:
         with: { node-version: 24 }
       - run: npm ci
       - run: npm run test:live
+      # A failure here usually means the BoE changed the IADB CSV format or
+      # redesigned the MPC dates page. Open (or comment on) a tracking issue
+      # so it doesn't silently rot in workflow run history.
+      - name: Open or update tracking issue on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const label = "live-canary";
+            try {
+              await github.rest.issues.createLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: label,
+                color: "d73a4a",
+                description: "Live BoE canary test failed",
+              });
+            } catch (err) {
+              if (err.status !== 422) throw err; // 422 = label already exists
+            }
+
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const title = "Live canary failed: BoE endpoint or format change";
+
+            const existing = await github.rest.search.issuesAndPullRequests({
+              q: `repo:${context.repo.owner}/${context.repo.repo} is:issue is:open label:${label}`,
+            });
+
+            if (existing.data.items.length > 0) {
+              const issue = existing.data.items[0];
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `Live canary failed again: ${runUrl}`,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                labels: [label],
+                body: [
+                  "The scheduled live canary run against the real BoE endpoints failed.",
+                  "This usually means the IADB CSV format or the MPC dates page changed.",
+                  "",
+                  `Failed run: ${runUrl}`,
+                ].join("\n"),
+              });
+            }
