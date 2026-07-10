@@ -3,6 +3,12 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { getCurrentRate } from "./tools/current-rate.js";
+import {
+  DEFAULT_SERIES_LIMIT,
+  getSeriesData,
+  MAX_SERIES_LIMIT,
+} from "./tools/get-series.js";
+import { listSeries } from "./tools/list-series.js";
 import { getNextMpcMeeting } from "./tools/next-meeting.js";
 import { getRateAt } from "./tools/rate-at.js";
 import { DEFAULT_HISTORY_LIMIT, getRateHistory } from "./tools/rate-history.js";
@@ -129,6 +135,83 @@ server.registerTool(
     },
   },
   () => respond(() => getNextMpcMeeting()),
+);
+
+server.registerTool(
+  "list_series",
+  {
+    title: "List known BoE IADB series",
+    description:
+      "List a curated catalog of well-known Bank of England IADB statistical series (policy rates, market rates, exchange rates, household rates) with their code, name, description, unit and frequency. Use this to discover series codes to pass to get_series. get_series also accepts any other IADB code, not only these.",
+    inputSchema: {},
+    outputSchema: {
+      series: z.array(
+        z.object({
+          code: z.string().describe("IADB series code, e.g. IUDBEDR — pass this to get_series"),
+          name: z.string().describe("Short human-readable name of the series"),
+          description: z.string().describe("One-line description of what the series measures"),
+          unit: z.string().describe("How to read a value, e.g. 'percent per annum'"),
+          frequency: z.string().describe("Observation cadence, e.g. 'daily', 'monthly'"),
+        }),
+      ),
+      note: z
+        .string()
+        .describe("Note explaining that get_series accepts any IADB code, not only the listed ones"),
+    },
+  },
+  () => respond(async () => listSeries()),
+);
+
+server.registerTool(
+  "get_series",
+  {
+    title: "Get a BoE IADB time series",
+    description:
+      "Fetch observations for any Bank of England IADB statistical series by its code (e.g. IUDSOIA for SONIA, XUDLUSS for USD/GBP). Optionally restrict to a date range and cap how many of the most recent points are returned. Use list_series to discover codes; any valid IADB code works, not only catalogued ones.",
+    inputSchema: {
+      seriesCode: z
+        .string()
+        .regex(/^[A-Z0-9]{4,12}$/i, "must be 4–12 letters or digits (e.g. IUDBEDR)")
+        .describe("IADB series code, e.g. IUDSOIA, XUDLUSS, IUMBV34 (case-insensitive)"),
+      from: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/, "must be an ISO 8601 date (YYYY-MM-DD)")
+        .optional()
+        .describe("Only return observations on or after this ISO 8601 date (YYYY-MM-DD)"),
+      to: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/, "must be an ISO 8601 date (YYYY-MM-DD)")
+        .optional()
+        .describe("Only return observations on or before this ISO 8601 date (YYYY-MM-DD)"),
+      limit: z
+        .number()
+        .int()
+        .min(1)
+        .max(MAX_SERIES_LIMIT)
+        .optional()
+        .describe(
+          `Maximum number of most-recent observations to return after date filtering (default ${DEFAULT_SERIES_LIMIT}, max ${MAX_SERIES_LIMIT})`,
+        ),
+    },
+    outputSchema: {
+      seriesCode: z.string().describe("The resolved (uppercased) IADB series code"),
+      name: z.string().optional().describe("Series name, present when the code is catalogued"),
+      unit: z.string().optional().describe("Value unit, present when the code is catalogued"),
+      frequency: z
+        .string()
+        .optional()
+        .describe("Observation cadence, present when the code is catalogued"),
+      points: z.array(
+        z.object({
+          date: isoDate.describe("Observation date"),
+          value: z.number().describe("Observed value in the series' unit"),
+        }),
+      ),
+      ...sourceFields,
+    },
+  },
+  ({ seriesCode, from, to, limit }) =>
+    respond(() => getSeriesData(seriesCode, from, to, limit ?? DEFAULT_SERIES_LIMIT)),
 );
 
 const transport = new StdioServerTransport();

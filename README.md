@@ -18,6 +18,10 @@ Published on npm as [`boe-mcp`](https://www.npmjs.com/package/boe-mcp) with buil
 | `get_rate_history` | Last N rate changes (default 10) — date, rate, move in basis points vs previous (`null` for the earliest known entry) | `{ "entries": [{ "date": "2025-12-18", "rate": 3.75, "changeBps": -25 }, ...], "source": "...", "cachedAt": "..." }` |
 | `get_rate_at` | The base rate in force on a specific historical date | `{ "date": "2020-03-15", "rate": 0.25, "effectiveDate": "2020-03-11", "source": "...", "cachedAt": "..." }` |
 | `get_next_mpc_meeting` | Date of the next scheduled MPC announcement and days until it | `{ "date": "2026-07-30", "daysUntil": 23, "source": "https://www.bankofengland.co.uk/monetary-policy/upcoming-mpc-dates", "cachedAt": "..." }` |
+| `list_series` | Curated catalog of well-known IADB series (policy rates, market rates, FX, household rates) with code, name, description, unit and frequency — a starting point for `get_series` | `{ "series": [{ "code": "IUDSOIA", "name": "SONIA (Sterling Overnight Index Average)", "description": "...", "unit": "percent per annum", "frequency": "daily (business days)" }, ...], "note": "get_series also accepts any other IADB code..." }` |
+| `get_series` | Fetch observations for **any** BoE IADB series by code, with optional `from`/`to` ISO dates and a `limit` (1–500, default 50) on the most recent points | `{ "seriesCode": "IUDSOIA", "name": "SONIA (Sterling Overnight Index Average)", "unit": "percent per annum", "frequency": "daily (business days)", "points": [{ "date": "2025-12-19", "value": 3.69 }, ...], "source": "...", "cachedAt": "..." }` |
+
+`get_series` accepts any valid IADB code (not only the catalogued ones); an unknown or empty code returns a clean `Unknown or empty IADB series "XXXX" — use list_series for known codes` message. Use `list_series` to discover codes.
 
 If the BoE is unreachable and a previously cached value exists, tools serve the cached data with `"stale": true` so the caller can flag the caveat. With no cache at all they return a clean error message.
 

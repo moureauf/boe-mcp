@@ -13,6 +13,18 @@ describe("iadbCsvUrl", () => {
     // a future series is just a different code — nothing else changes
     expect(iadbCsvUrl("LPMVTVX")).toContain("SeriesCodes=LPMVTVX");
   });
+
+  it("defaults to the full history through now", () => {
+    const url = iadbCsvUrl("IUDBEDR");
+    expect(url).toContain("Datefrom=01%2FJan%2F1975");
+    expect(url).toContain("Dateto=now");
+  });
+
+  it("accepts an explicit Dateto for a bounded server-side window", () => {
+    const url = iadbCsvUrl("IUDSOIA", "01/Jan/2020", "31/Dec/2020");
+    expect(url).toContain("Datefrom=01%2FJan%2F2020");
+    expect(url).toContain("Dateto=31%2FDec%2F2020");
+  });
 });
 
 describe("fetchSeriesPoints", () => {

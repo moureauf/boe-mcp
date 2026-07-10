@@ -26,11 +26,14 @@ index.ts          # server entry, tool registration
 boe-client.ts     # BoE API calls + CSV/HTML parsing
 cache.ts          # generic TTL cache
 data.ts           # shared cached accessors used by the tools
+series-catalog.ts # curated IADB series catalog + lookup (for list_series)
 tools/
     current-rate.ts
     rate-history.ts
     rate-at.ts
     next-meeting.ts
+    list-series.ts
+    get-series.ts
 test/                 # vitest tests + fixtures (test/live/ hits the network)
 docs/specs/design.md  # full design spec — read this first
 
@@ -42,6 +45,8 @@ docs/specs/design.md  # full design spec — read this first
 | `get_rate_history` | Last N rate changes with basis points (default 10) |
 | `get_rate_at` | Base rate in force on a given historical date |
 | `get_next_mpc_meeting` | Date of next MPC meeting and days until it |
+| `list_series` | Curated catalog of well-known IADB series (code, name, description, unit, frequency) |
+| `get_series` | Observations for any IADB series by code, with optional from/to dates and limit |
 
 ## Testing
 
