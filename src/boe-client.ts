@@ -35,11 +35,16 @@ function toIso(day: string, monthName: string, year: string): string | null {
   return `${year}-${String(month).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 }
 
-export function iadbCsvUrl(seriesCode: string, from = "01/Jan/1975"): string {
+// `to` defaults to "now" so the shared getSeries accessor fetches (and caches)
+// the full history for a code once; get_series then filters that in memory
+// rather than encoding date ranges into the URL, which would fragment the cache
+// key per (code, from, to). The parameter is exposed for callers that do want a
+// bounded server-side window.
+export function iadbCsvUrl(seriesCode: string, from = "01/Jan/1975", to = "now"): string {
   const params = new URLSearchParams({
     "csv.x": "yes",
     Datefrom: from,
-    Dateto: "now",
+    Dateto: to,
     SeriesCodes: seriesCode,
     CSVF: "TN",
     UsingCodes: "Y",
