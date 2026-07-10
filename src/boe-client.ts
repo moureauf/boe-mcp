@@ -71,10 +71,12 @@ export function parseIadbCsv(csv: string): SeriesPoint[] {
 
 function visibleText(html: string): string {
   return html
-    // `\s*` before the closing `>` so crafted end tags like `</script >` or
-    // `</style\n>` are still stripped (CodeQL js/bad-tag-filter).
-    .replace(/<script[\s\S]*?<\/script\s*>/gi, " ")
-    .replace(/<style[\s\S]*?<\/style\s*>/gi, " ")
+    // Strip <script>/<style> blocks. The body is matched with an unrolled loop
+    // (`[^<]*(?:(?!</tag)<[^<]*)*`) so there are no overlapping quantifiers to
+    // backtrack (no ReDoS), and the end tag allows whitespace before `>` so
+    // crafted tags like `</script >` are still matched (CodeQL js/bad-tag-filter).
+    .replace(/<script\b[^<]*(?:(?!<\/script)<[^<]*)*<\/script\s*>/gi, " ")
+    .replace(/<style\b[^<]*(?:(?!<\/style)<[^<]*)*<\/style\s*>/gi, " ")
     .replace(/<[^>]+>/g, " ")
     .replace(/&nbsp;|&#0*160;/gi, " ")
     .replace(/&amp;/gi, "&");
