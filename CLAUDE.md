@@ -15,14 +15,20 @@ Published to npm as `boe-mcp`.
 
 ## Architecture
 
-Claude Code → MCP Server (stdio) → in-memory TTL cache → BoE IADB API
+Claude Code → MCP Server (stdio by default; opt-in Streamable HTTP) → in-memory TTL cache → BoE IADB API
 
 No auth required. All data from public BoE endpoints.
+
+Transports: stdio is the default. HTTP mode is opt-in via `--http [port]` or
+`BOE_MCP_HTTP_PORT` (bind host `BOE_MCP_HTTP_HOST`, default 127.0.0.1) and runs
+the SDK's StreamableHTTPServerTransport statelessly — a fresh server per POST.
 
 ## Project structure
 
 src/
-index.ts          # server entry, tool registration
+index.ts          # thin entry point: transport selection (stdio vs --http)
+server.ts         # createServer(): tool registration (x-release-please-version marker lives here)
+http.ts           # opt-in Streamable HTTP transport (stateless), /mcp + /healthz
 boe-client.ts     # BoE API calls + CSV/HTML parsing
 cache.ts          # generic TTL cache
 data.ts           # shared cached accessors used by the tools
@@ -47,6 +53,15 @@ docs/specs/design.md  # full design spec — read this first
 | `get_next_mpc_meeting` | Date of next MPC meeting and days until it |
 | `list_series` | Curated catalog of well-known IADB series (code, name, description, unit, frequency) |
 | `get_series` | Observations for any IADB series by code, with optional from/to dates and limit |
+
+## Configuration env vars
+
+| Env var | Purpose |
+|---------|---------|
+| `BOE_CACHE_TTL_MINUTES` | Cache TTL (default 60, 0 disables) |
+| `BOE_MCP_HTTP_PORT` | Enable HTTP mode on this port (also `--http [port]` flag) |
+| `BOE_MCP_HTTP_HOST` | HTTP bind host (default 127.0.0.1; 0.0.0.0 exposes to the network) |
+| `BOE_IADB_BASE_URL` / `BOE_MPC_DATES_URL` | Override endpoints (fixture testing) |
 
 ## Testing
 

@@ -25,10 +25,14 @@ Part of a planned family of UK macro data MCPs (`boe-mcp`, `ons-mcp`) built as i
 ## Architecture
 
 ```
-Claude Code → MCP Server (stdio) → in-memory TTL cache → BoE IADB API (on miss)
+Claude Code → MCP Server (stdio | Streamable HTTP) → in-memory TTL cache → BoE IADB API (on miss)
 ```
 
 The server is a Node.js process spawned by Claude Code as a child process over stdio transport. No persistent background process, no ports.
+
+### Second transport: opt-in Streamable HTTP (added 2026-07)
+
+For remote hosting the server can also run as a Streamable HTTP service: `--http [port]` or `BOE_MCP_HTTP_PORT` (default port 3000; bind host `BOE_MCP_HTTP_HOST`, default 127.0.0.1). Implementation: `src/server.ts` exports `createServer()` with all tool registration; `src/index.ts` is a thin entry point selecting the transport; `src/http.ts` runs the SDK's `StreamableHTTPServerTransport` in **stateless** mode (`sessionIdGenerator: undefined`) on a plain `node:http` server — a fresh server+transport pair per POST, no sessions, horizontally scalable. Routes: `POST /mcp` (JSON-RPC), `GET /healthz`; `GET`/`DELETE /mcp` → 405. DNS-rebinding protection (Host-header allowlist) is enabled for loopback binds. Stdio remains the default and is behaviorally unchanged.
 
 ### Data Sources
 

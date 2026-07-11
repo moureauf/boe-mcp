@@ -6,7 +6,7 @@
 [![license](https://img.shields.io/npm/l/boe-mcp)](./LICENSE)
 [![MCP Registry](https://img.shields.io/badge/MCP_Registry-io.github.moureauf%2Fboe--mcp-blue)](https://registry.modelcontextprotocol.io/v0/servers?search=io.github.moureauf/boe-mcp)
 
-An MCP (Model Context Protocol) server that gives Claude Code — or any MCP client — live Bank of England base rate data: the current rate and how long it has been held, the history of recent rate changes, and the date of the next Monetary Policy Committee announcement. It runs over stdio, needs no API key or configuration, and caches responses in memory so repeated questions don't re-hit the BoE.
+An MCP (Model Context Protocol) server that gives Claude Code — or any MCP client — live Bank of England base rate data: the current rate and how long it has been held, the history of recent rate changes, and the date of the next Monetary Policy Committee announcement. It runs over stdio by default (with an opt-in Streamable HTTP mode for remote hosting), needs no API key or configuration, and caches responses in memory so repeated questions don't re-hit the BoE.
 
 Published on npm as [`boe-mcp`](https://www.npmjs.com/package/boe-mcp) with build [provenance](https://docs.npmjs.com/generating-provenance-statements/) — install and run it with `npx -y boe-mcp`.
 
@@ -100,11 +100,42 @@ Add to `.vscode/mcp.json`:
 
 </details>
 
+## HTTP mode (remote hosting)
+
+By default the server speaks MCP over stdio as a child process of the client. To host it remotely instead, start it in Streamable HTTP mode:
+
+```bash
+npx -y boe-mcp --http                  # listen on http://127.0.0.1:3000/mcp
+npx -y boe-mcp --http 8080             # explicit port
+BOE_MCP_HTTP_PORT=8080 npx -y boe-mcp  # env var instead of the flag
+```
+
+| Setting | How | Default |
+|---------|-----|---------|
+| Enable HTTP mode | `--http` flag or `BOE_MCP_HTTP_PORT` env var | off (stdio) |
+| Port | `--http <port>`, else `BOE_MCP_HTTP_PORT`, else `3000` | `3000` |
+| Bind host | `BOE_MCP_HTTP_HOST` | `127.0.0.1` |
+
+Endpoints: `POST /mcp` (JSON-RPC), `GET /healthz` (returns `ok`, for hosting platform health checks). The transport is **stateless** — every POST is served by a fresh server instance, so there are no sessions to resume and no SSE stream; `GET`/`DELETE /mcp` return 405. That makes instances safe to scale horizontally behind a load balancer.
+
+Try it with curl:
+
+```bash
+curl -X POST http://127.0.0.1:3000/mcp \
+  -H 'content-type: application/json' \
+  -H 'accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"curl","version":"0"}}}'
+```
+
+**Security**: the default bind of `127.0.0.1` only accepts connections from the local machine, and DNS-rebinding protection (Host-header validation) is enabled automatically for loopback binds. Setting `BOE_MCP_HTTP_HOST=0.0.0.0` exposes the server, with no authentication, to every network the machine is attached to — only do that behind a reverse proxy or firewall that controls who can reach it (DNS-rebinding protection is disabled for non-loopback binds, since the server can't know the legitimate public hostname).
+
 ## Configuration
 
 | Env var | Default | Description |
 |---------|---------|-------------|
 | `BOE_CACHE_TTL_MINUTES` | `60` | How long to cache BoE responses in memory (`0` disables caching) |
+| `BOE_MCP_HTTP_PORT` | unset | Enable HTTP mode on this port (see [HTTP mode](#http-mode-remote-hosting)) |
+| `BOE_MCP_HTTP_HOST` | `127.0.0.1` | Bind host for HTTP mode — `0.0.0.0` exposes the server to the network; see the security note above |
 
 ## Data sources
 
