@@ -126,7 +126,7 @@ describe("HTTP transport", () => {
     expect(result?.protocolVersion).toBeTruthy();
   });
 
-  it("lists all six tools over HTTP", async () => {
+  it("lists all eight tools over HTTP", async () => {
     const { status, message } = await postMcp(baseUrl, {
       jsonrpc: "2.0",
       id: 2,
@@ -139,9 +139,11 @@ describe("HTTP transport", () => {
     const names = tools.map((t) => t.name).sort();
     expect(names).toEqual([
       "get_current_rate",
+      "get_mpc_dates",
       "get_next_mpc_meeting",
       "get_rate_at",
       "get_rate_history",
+      "get_rate_stats",
       "get_series",
       "list_series",
     ]);
