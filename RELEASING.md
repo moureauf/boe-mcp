@@ -35,17 +35,29 @@ CHANGE` → major).
 
 1. Land your changes on `main` with conventional-commit messages.
 2. release-please keeps an open **"chore: release X.Y.Z"** PR that bumps the
-   version everywhere (`package.json`, `src/index.ts`, both fields in
+   version everywhere (`package.json`, `src/server.ts`, both fields in
    `server.json`) and updates `CHANGELOG.md`. Review and **merge it** — that
-   creates the `vX.Y.Z` git tag and GitHub release.
-3. **Publish:** go to **Actions → Publish → Run workflow** (on `main`). It
-   builds, tests, `npm publish --provenance`, and publishes `server.json` to the
-   MCP registry. (Publishing is a deliberate manual step; the guard skips npm if
-   the version is already there.)
+   creates the `vX.Y.Z` git tag and GitHub release, and the workflow then
+   dispatches **Publish** automatically on the new tag. It builds, tests,
+   `npm publish --provenance`, and publishes `server.json` to the MCP registry.
+3. Nothing else — but **Actions → Publish → Run workflow** still works as a
+   manual (re-)publish of whatever version `package.json` has on the chosen
+   ref, and the guard skips npm if the version is already there.
+
+> Why the dispatch step exists: tags created by release-please use the built-in
+> `GITHUB_TOKEN`, and tag pushes made with that token never trigger
+> `on: push: tags` workflows. `workflow_dispatch` is exempt from that rule, so
+> the release-please job dispatches `publish.yml` itself. The `v0.2.0` release
+> was recovered manually before this chain existed.
 
 The `version is in sync` test guards against the four version locations drifting
 if you ever bump by hand. Pushing a `vX.Y.Z` tag manually also triggers
 `publish.yml`, so a hand-cut release still works.
+
+Note: the CI checks required by branch protection don't start on the
+release-please branch automatically (same `GITHUB_TOKEN` rule), so merging the
+release PR needs either a human-credentialed push to its branch or an admin
+merge. An empty commit to the branch is enough to kick CI.
 
 The MCP registry publish is automated inside `publish.yml` (the `mcp-registry`
 job, via `mcp-publisher` + GitHub OIDC), so no separate step is needed. To
