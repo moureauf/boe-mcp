@@ -1,9 +1,12 @@
 name: release-please
-# Maintains a release PR that bumps the version (package.json, src/index.ts,
+# Maintains a release PR that bumps the version (package.json, src/server.ts,
 # server.json) and updates CHANGELOG.md from conventional-commit messages.
-# Merging that PR creates the vX.Y.Z tag + GitHub release. Publishing stays
-# manual: after the release is created, run the Publish workflow
-# (Actions -> Publish -> Run workflow).
+# Merging that PR creates the vX.Y.Z tag + GitHub release, then the dispatch
+# step below triggers the Publish workflow automatically. (Tags created with
+# GITHUB_TOKEN never fire `on: push: tags` workflows, so publish.yml's tag
+# trigger only covers hand-pushed tags; workflow_dispatch is exempt from that
+# rule, which is why the chain works.) Publish can still be run by hand:
+# Actions -> Publish -> Run workflow.
 on:
   push:
     branches: [main]
@@ -11,11 +14,24 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  actions: write # dispatch publish.yml after a release is created
 jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
-      - uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4.4.1
+      - id: release
+        uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4.4.1
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+      - name: Dispatch Publish workflow for the new release
+        if: steps.release.outputs.release_created == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.release.outputs.tag_name }}
+        run: |
+          curl -fsS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/publish.yml/dispatches" \
+            -d "{\"ref\":\"$TAG\"}"
