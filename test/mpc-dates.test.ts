@@ -1,7 +1,8 @@
 import { readFileSync } from "node:fs";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { parseMpcDates } from "../src/boe-client.js";
-import { nextMeeting } from "../src/tools/next-meeting.js";
+import { getUpcomingMpcDates } from "../src/tools/mpc-dates.js";
+import { daysUntil, nextMeeting, upcomingMeetings } from "../src/tools/next-meeting.js";
 
 const fixture = readFileSync(new URL("./fixtures/mpc-dates.html", import.meta.url), "utf8");
 
@@ -92,5 +93,83 @@ describe("nextMeeting / daysUntil", () => {
 
   it("returns null when all listed dates are in the past", () => {
     expect(nextMeeting(dates, new Date(Date.UTC(2030, 0, 1)))).toBeNull();
+  });
+});
+
+describe("daysUntil", () => {
+  it("is 0 on the day itself regardless of time of day", () => {
+    expect(daysUntil("2026-07-30", new Date(Date.UTC(2026, 6, 30, 23, 59)))).toBe(0);
+  });
+
+  it("counts calendar days, not 24-hour periods", () => {
+    expect(daysUntil("2026-07-31", new Date(Date.UTC(2026, 6, 30, 23, 59)))).toBe(1);
+  });
+
+  it("is negative for past dates", () => {
+    expect(daysUntil("2026-07-29", new Date(Date.UTC(2026, 6, 30)))).toBe(-1);
+  });
+});
+
+describe("upcomingMeetings", () => {
+  const dates = parseMpcDates(fixture);
+
+  it("returns every date on or after today with its daysUntil, ascending", () => {
+    const now = new Date(Date.UTC(2026, 10, 5, 9, 30)); // 2026-11-05, a meeting day
+    expect(upcomingMeetings(dates, now)).toEqual([
+      { date: "2026-11-05", daysUntil: 0 },
+      { date: "2026-12-17", daysUntil: 42 },
+      { date: "2027-02-04", daysUntil: 91 },
+      { date: "2027-03-18", daysUntil: 133 },
+    ]);
+  });
+
+  it("excludes past dates that still appear on the page", () => {
+    const now = new Date(Date.UTC(2026, 6, 6));
+    expect(upcomingMeetings(dates, now).map((m) => m.date)).toEqual([
+      "2026-07-30",
+      "2026-09-17",
+      "2026-11-05",
+      "2026-12-17",
+      "2027-02-04",
+      "2027-03-18",
+    ]);
+  });
+
+  it("returns an empty list when every listed date is in the past", () => {
+    expect(upcomingMeetings(dates, new Date(Date.UTC(2030, 0, 1)))).toEqual([]);
+  });
+});
+
+describe("getUpcomingMpcDates (tool handler)", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  function stubPage() {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(fixture, { status: 200 })));
+  }
+
+  it("returns all upcoming dates with source and cachedAt", async () => {
+    stubPage();
+    const result = await getUpcomingMpcDates(new Date(Date.UTC(2026, 6, 6)));
+    expect(result.dates[0]).toEqual({ date: "2026-07-30", daysUntil: 24 });
+    expect(result.dates.map((m) => m.date)).toEqual([
+      "2026-07-30",
+      "2026-09-17",
+      "2026-11-05",
+      "2026-12-17",
+      "2027-02-04",
+      "2027-03-18",
+    ]);
+    expect(result.source).toContain("bankofengland.co.uk");
+    expect(result.cachedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    expect(result.stale).toBeUndefined();
+  });
+
+  it("throws a clean error when the page only lists past dates", async () => {
+    stubPage();
+    await expect(getUpcomingMpcDates(new Date(Date.UTC(2030, 0, 1)))).rejects.toThrow(
+      /no future meetings/i,
+    );
   });
 });

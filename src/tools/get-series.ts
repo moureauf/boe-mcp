@@ -31,7 +31,7 @@ export function normaliseSeriesCode(code: string): string {
   return code.toUpperCase();
 }
 
-function assertIsoDate(label: string, value: string): void {
+export function assertIsoDate(label: string, value: string): void {
   if (!ISO_DATE_PATTERN.test(value)) {
     throw new Error(`Invalid ${label} date "${value}" — must be an ISO 8601 date (YYYY-MM-DD)`);
   }

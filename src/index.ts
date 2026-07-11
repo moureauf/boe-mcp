@@ -9,9 +9,11 @@ import {
   MAX_SERIES_LIMIT,
 } from "./tools/get-series.js";
 import { listSeries } from "./tools/list-series.js";
+import { getUpcomingMpcDates } from "./tools/mpc-dates.js";
 import { getNextMpcMeeting } from "./tools/next-meeting.js";
 import { getRateAt } from "./tools/rate-at.js";
 import { DEFAULT_HISTORY_LIMIT, getRateHistory } from "./tools/rate-history.js";
+import { getRateStats } from "./tools/rate-stats.js";
 
 const server = new McpServer({ name: "boe-mcp", version: "0.1.3" }); // x-release-please-version
 
@@ -122,6 +124,62 @@ server.registerTool(
 );
 
 server.registerTool(
+  "get_rate_stats",
+  {
+    title: "BoE base rate statistics over a range",
+    description:
+      "Get summary statistics of the Bank of England base rate over a date range: minimum and maximum (with the date each level first applied), the time-weighted average, and the rates in force at the start and end of the window with the net move in basis points. Both dates are optional — omit them for the full available history through today. The rate level in force on the start date counts even if it took effect earlier.",
+    inputSchema: {
+      from: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/, "must be an ISO 8601 date (YYYY-MM-DD)")
+        .optional()
+        .describe(
+          "Start of the window, ISO 8601 (YYYY-MM-DD). Defaults to the start of the available series",
+        ),
+      to: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/, "must be an ISO 8601 date (YYYY-MM-DD)")
+        .optional()
+        .describe(
+          "End of the window (inclusive), ISO 8601 (YYYY-MM-DD). Defaults to today; must not be in the future",
+        ),
+    },
+    outputSchema: {
+      from: isoDate.describe(
+        "Effective window start used (the first available data point when `from` was omitted or predates the series)",
+      ),
+      to: isoDate.describe("Effective window end used (today when `to` was omitted)"),
+      min: z.object({
+        rate: z.number().describe("Lowest base rate in percent in force during the window"),
+        date: isoDate.describe(
+          "First date this level was in force within the window (the window start for a level carried in from before it)",
+        ),
+      }),
+      max: z.object({
+        rate: z.number().describe("Highest base rate in percent in force during the window"),
+        date: isoDate.describe(
+          "First date this level was in force within the window (the window start for a level carried in from before it)",
+        ),
+      }),
+      average: z
+        .number()
+        .describe(
+          "Time-weighted average rate in percent: each level weighted by the number of calendar days it was in force within the window (not a plain mean of the sparse change points), rounded to 4 decimal places",
+        ),
+      startRate: z.number().describe("Rate in percent in force on the window start date"),
+      endRate: z.number().describe("Rate in percent in force on the window end date"),
+      changeBps: z
+        .number()
+        .int()
+        .describe("Net move over the window: endRate minus startRate, in basis points"),
+      ...sourceFields,
+    },
+  },
+  ({ from, to }) => respond(() => getRateStats(from, to)),
+);
+
+server.registerTool(
   "get_next_mpc_meeting",
   {
     title: "Next MPC meeting",
@@ -135,6 +193,31 @@ server.registerTool(
     },
   },
   () => respond(() => getNextMpcMeeting()),
+);
+
+server.registerTool(
+  "get_mpc_dates",
+  {
+    title: "Upcoming MPC announcement dates",
+    description:
+      "Get every upcoming Bank of England Monetary Policy Committee announcement date on the published schedule (typically a year or more ahead), each with the number of calendar days until it. Use get_next_mpc_meeting when only the next date is needed.",
+    inputSchema: {},
+    outputSchema: {
+      dates: z
+        .array(
+          z.object({
+            date: isoDate.describe("Date of the MPC announcement"),
+            daysUntil: z
+              .number()
+              .int()
+              .describe("Calendar days from today until the announcement (0 = today)"),
+          }),
+        )
+        .describe("All published announcement dates on or after today, ascending"),
+      ...sourceFields,
+    },
+  },
+  () => respond(() => getUpcomingMpcDates()),
 );
 
 server.registerTool(
