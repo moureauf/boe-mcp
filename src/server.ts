@@ -55,7 +55,7 @@ const sourceFields = {
  * incoming request.
  */
 export function createServer(): McpServer {
-  const server = new McpServer({ name: "boe-mcp", version: "0.1.3" }); // x-release-please-version
+  const server = new McpServer({ name: "boe-mcp", version: "0.2.0" }); // x-release-please-version
 
   server.registerTool(
     "get_current_rate",
