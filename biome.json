@@ -1,22 +1,22 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.3/schema.json",
-  "files": {
-    "includes": ["src/**", "test/**", "!test/fixtures/**"]
-  },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": true,
-      "style": {
-        "useTemplate": "off"
-      }
-    }
-  },
-  "formatter": { "enabled": false },
-  "overrides": [
-    {
-      "includes": ["test/**"],
-      "linter": { "rules": { "style": { "noNonNullAssertion": "off" } } }
-    }
-  ]
+	"$schema": "https://biomejs.dev/schemas/2.5.3/schema.json",
+	"files": {
+		"includes": ["src/**", "test/**", "!test/fixtures"]
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"preset": "recommended",
+			"style": {
+				"useTemplate": "off"
+			}
+		}
+	},
+	"formatter": { "enabled": false },
+	"overrides": [
+		{
+			"includes": ["test/**"],
+			"linter": { "rules": { "style": { "noNonNullAssertion": "off" } } }
+		}
+	]
 }

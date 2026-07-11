@@ -6,7 +6,7 @@
 [![license](https://img.shields.io/npm/l/boe-mcp)](./LICENSE)
 [![MCP Registry](https://img.shields.io/badge/MCP_Registry-io.github.moureauf%2Fboe--mcp-blue)](https://registry.modelcontextprotocol.io/v0/servers?search=io.github.moureauf/boe-mcp)
 
-An MCP (Model Context Protocol) server that gives Claude Code — or any MCP client — live Bank of England base rate data: the current rate and how long it has been held, the history of recent rate changes, and the date of the next Monetary Policy Committee announcement. It runs over stdio by default (with an opt-in Streamable HTTP mode for remote hosting), needs no API key or configuration, and caches responses in memory so repeated questions don't re-hit the BoE.
+An MCP (Model Context Protocol) server that gives Claude Code — or any MCP client — live Bank of England data: the base rate (current level, change history, statistics over any period, and the rate in force on any past date), **any series from the BoE's IADB statistical database** (SONIA, exchange rates, quoted mortgage rates, and thousands more, with a curated catalog to start from), and the Monetary Policy Committee meeting schedule. It runs over stdio by default (with an opt-in Streamable HTTP mode for remote hosting), needs no API key or configuration, and caches responses in memory so repeated questions don't re-hit the BoE.
 
 Published on npm as [`boe-mcp`](https://www.npmjs.com/package/boe-mcp) with build [provenance](https://docs.npmjs.com/generating-provenance-statements/) — install and run it with `npx -y boe-mcp`.
 

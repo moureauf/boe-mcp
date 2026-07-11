@@ -84,12 +84,19 @@ interface NextMeeting {
 ```
 boe-mcp/
 ├── src/
-│   ├── index.ts               # MCP server entry point, tool registration
+│   ├── index.ts               # thin entry point: transport selection (stdio vs --http)
+│   ├── server.ts              # createServer(): tool registration (version marker lives here)
+│   ├── http.ts                # opt-in Streamable HTTP transport (stateless)
 │   ├── tools/
 │   │   ├── current-rate.ts    # get_current_rate tool handler
 │   │   ├── rate-history.ts    # get_rate_history tool handler
 │   │   ├── rate-at.ts         # get_rate_at tool handler
-│   │   └── next-meeting.ts    # get_next_mpc_meeting tool handler
+│   │   ├── rate-stats.ts      # get_rate_stats tool handler
+│   │   ├── next-meeting.ts    # get_next_mpc_meeting tool handler
+│   │   ├── mpc-dates.ts       # get_mpc_dates tool handler
+│   │   ├── list-series.ts     # list_series tool handler
+│   │   └── get-series.ts      # get_series tool handler
+│   ├── series-catalog.ts      # curated IADB series catalog backing list_series
 │   ├── boe-client.ts          # BoE API calls + CSV/HTML parsing
 │   ├── data.ts                # shared cached accessors used by the tools
 │   └── cache.ts               # Generic TTL cache
