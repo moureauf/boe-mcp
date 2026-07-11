@@ -6,7 +6,7 @@
       "changelog-path": "CHANGELOG.md",
       "include-v-in-tag": true,
       "extra-files": [
-        "src/index.ts",
+        "src/server.ts",
         {
           "type": "json",
           "path": "server.json",

@@ -4,13 +4,22 @@ import { describe, expect, it } from "vitest";
 const read = (p: string) => readFileSync(new URL(`../${p}`, import.meta.url), "utf8");
 const pkg = JSON.parse(read("package.json"));
 const serverManifest = JSON.parse(read("server.json"));
-const indexSrc = read("src/index.ts");
+const serverSrc = read("src/server.ts");
 
 // The version lives in four places; a release bumps package.json and these
 // must follow. This catches the drift before it ships.
 describe("version is in sync across the package", () => {
-  it("src/index.ts advertises the package.json version to MCP clients", () => {
-    expect(indexSrc).toContain(`version: "${pkg.version}"`);
+  it("src/server.ts advertises the package.json version to MCP clients", () => {
+    expect(serverSrc).toContain(`version: "${pkg.version}"`);
+  });
+
+  it("src/server.ts keeps the release-please version marker on the McpServer line", () => {
+    // release-please rewrites the version on the annotated line (see
+    // release-please-config.json extra-files); the marker must stay greppable
+    // and keep its shape wherever it lives.
+    expect(serverSrc).toMatch(
+      /new McpServer\(\{ name: "boe-mcp", version: "[^"]+" \}\); \/\/ x-release-please-version/,
+    );
   });
 
   it("server.json (MCP registry manifest) matches the package version", () => {
