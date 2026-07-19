@@ -23,11 +23,14 @@ npm test           # unit tests (network mocked)
 
 ```
 src/
-  index.ts          # MCP server + tool registration (stdio transport)
+  index.ts          # thin entry point: transport selection (stdio vs --http)
+  server.ts         # createServer(): MCP server + tool registration
+  http.ts           # opt-in Streamable HTTP transport (stateless)
   boe-client.ts     # all HTTP + CSV/HTML parsing (series code is config)
   cache.ts          # generic in-memory TTL cache
   data.ts           # shared cached accessors used by the tools
-  tools/            # one file per tool (current-rate, rate-history, rate-at, next-meeting)
+  series-catalog.ts # curated IADB series catalog backing list_series
+  tools/            # one file per tool (current-rate, rate-history, rate-at, rate-stats, next-meeting, mpc-dates, list-series, get-series)
 test/               # vitest unit tests + fixtures; test/live/ hits the real BoE
 server.json         # official MCP registry manifest
 ```
@@ -82,8 +85,8 @@ is used for linting only.
 The architecture is built so this is additive. A new IADB series is just a new
 series code passed to `fetchSeriesPoints` in `boe-client.ts` — no structural
 change. A new tool is a new file in `src/tools/` plus a `registerTool` block in
-`index.ts` (give it an `inputSchema`/`outputSchema` like the others). Add its
-row to the tools table in `README.md`.
+`src/server.ts` (give it an `inputSchema`/`outputSchema` like the others). Add
+its row to the tools tables in `README.md` and `CLAUDE.md`.
 
 ## Versioning
 
@@ -92,7 +95,7 @@ release-please (and guarded by the `version is in sync` test in
 `test/version-sync.test.ts`):
 
 - `package.json` → `version`
-- `src/index.ts` → `new McpServer({ version })` (marked `x-release-please-version`)
+- `src/server.ts` → `new McpServer({ version })` (marked `x-release-please-version`)
 - `server.json` → `version` **and** `packages[0].version`
 
 You don't bump these by hand — release-please does it in the release PR based on
@@ -101,15 +104,15 @@ your conventional-commit messages. Semver: `fix:` → patch, `feat:` → minor,
 
 ## Releasing
 
-Version bump + changelog are automated by
-[release-please](https://github.com/googleapis/release-please); publishing is a
-manual button. In short:
+Version bump, changelog, and publishing are all automated by
+[release-please](https://github.com/googleapis/release-please). In short:
 
 1. Merge PRs to `main` with conventional-commit titles.
 2. release-please maintains a **"chore: release X.Y.Z"** PR — merge it to create
-   the `vX.Y.Z` tag + GitHub release.
-3. **Actions → Publish → Run workflow** publishes to npm (trusted publishing +
-   provenance) and the MCP registry.
+   the `vX.Y.Z` tag + GitHub release, and the workflow then dispatches
+   **Publish** automatically, which publishes to npm (trusted publishing +
+   provenance) and the MCP registry. (**Actions → Publish → Run workflow**
+   remains available as a manual re-publish.)
 
 Full details, including the one-time trusted-publisher setup and manual
 fallbacks, are in [`RELEASING.md`](RELEASING.md).
@@ -123,7 +126,7 @@ fallbacks, are in [`RELEASING.md`](RELEASING.md).
 ```
 commits (Conventional Commits) ──▶ release-please PR ──(merge)──▶ vX.Y.Z tag + release
                                                                          │
-                                              Actions ▸ Publish ◀────────┘ (manual)
+                                              Actions ▸ Publish ◀────────┘ (auto-dispatched)
                                                   ├──▶ npm registry   (boe-mcp, with provenance → this repo/commit)
                                                   └──▶ MCP registry    (io.github.moureauf/boe-mcp → the npm package)
 ```
