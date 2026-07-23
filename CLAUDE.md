@@ -1,7 +1,8 @@
 # boe-mcp
 
-TypeScript MCP server exposing Bank of England base rate data.
-Published to npm as `boe-mcp`.
+TypeScript MCP server for Bank of England data: base rate (current, history,
+stats, historical lookup), any IADB statistical series (SONIA, exchange
+rates, mortgage rates), and MPC meeting dates. Published to npm as `boe-mcp`.
 
 ## Commands
 
@@ -66,12 +67,6 @@ docs/specs/design.md  # full design spec — read this first
 | `BOE_MCP_HTTP_PORT` | Enable HTTP mode on this port (also `--http [port]` flag) |
 | `BOE_MCP_HTTP_HOST` | HTTP bind host (default 127.0.0.1; 0.0.0.0 exposes to the network) |
 | `BOE_IADB_BASE_URL` / `BOE_MPC_DATES_URL` | Override endpoints (fixture testing) |
-
-## Testing
-
-```bash
-npx @modelcontextprotocol/inspector node dist/index.js
-```
 
 ## Git workflow
 - Never push directly to main
