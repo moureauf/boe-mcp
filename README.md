@@ -156,16 +156,6 @@ npm run build
 npm start            # runs the stdio server
 ```
 
-Test and inspect:
-
-```bash
-npm test             # unit tests (HTTP mocked, no network)
-npm run test:live    # integration smoke test against the real BoE endpoints
-npx @modelcontextprotocol/inspector node dist/index.js
-```
-
-`BOE_IADB_BASE_URL` and `BOE_MPC_DATES_URL` can override the endpoint URLs, which is useful for testing against fixtures.
-
 ## Contributing & releasing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow (making changes, testing, adding tools, versioning) and how the release pipeline connects GitHub, npm, and the MCP registry. Publishing is automated: pushing a `v*` tag runs `.github/workflows/publish.yml`, which builds, tests, and publishes to npm via [trusted publishing](https://docs.npmjs.com/trusted-publishers/) (OIDC — no token secret, with a provenance attestation) and to the official MCP registry. Exact commands and one-time setup are in [RELEASING.md](RELEASING.md).
