@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1f2a"/>
+      <stop offset="1" stop-color="#0e2f36"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1280" height="640" fill="url(#bg)"/>
+
+  <text x="1060" y="360" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="520" font-weight="700"
+        fill="#54dbc3" fill-opacity="0.08" text-anchor="middle">&#163;</text>
+
+  <circle cx="90" cy="96" r="6" fill="#54dbc3"/>
+  <text x="108" y="101" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="18" font-weight="700"
+        letter-spacing="2" fill="#54dbc3">MODEL CONTEXT PROTOCOL SERVER</text>
+
+  <text x="84" y="200" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="80" font-weight="700" fill="#eff6f5">boe<tspan fill="#54dbc3">-mcp</tspan></text>
+
+  <text x="86" y="258" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="25" fill="#d7e6e3">Base rate, any IADB series (SONIA, FX, mortgage rates), MPC</text>
+  <text x="86" y="294" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="25" fill="#d7e6e3">meeting dates &#8212; stats, history, and live lookups &#8212; for</text>
+  <text x="86" y="330" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="25" fill="#d7e6e3">Claude Code and any MCP client, over stdio or HTTP.</text>
+
+  <!-- tool pills -->
+  <g font-family="Menlo, monospace" font-size="20" font-weight="600">
+    <rect x="84"  y="378" width="216" height="50" rx="25" fill="#12383e" stroke="#1e4e54" stroke-width="1.5"/>
+    <text x="192" y="410" text-anchor="middle" fill="#bcd6d1">get_current_rate</text>
+
+    <rect x="316" y="378" width="180" height="50" rx="25" fill="#12383e" stroke="#1e4e54" stroke-width="1.5"/>
+    <text x="406" y="410" text-anchor="middle" fill="#bcd6d1">get_rate_stats</text>
+
+    <rect x="512" y="378" width="160" height="50" rx="25" fill="#12383e" stroke="#1e4e54" stroke-width="1.5"/>
+    <text x="592" y="410" text-anchor="middle" fill="#bcd6d1">get_series</text>
+
+    <rect x="688" y="378" width="180" height="50" rx="25" fill="#12383e" stroke="#1e4e54" stroke-width="1.5"/>
+    <text x="778" y="410" text-anchor="middle" fill="#bcd6d1">get_mpc_dates</text>
+  </g>
+
+  <!-- command snippet -->
+  <rect x="84" y="466" width="316" height="58" rx="16" fill="#5adcc4"/>
+  <text x="112" y="504" font-family="Menlo, monospace" font-size="24" fill="#2a8478">$</text>
+  <text x="138" y="504" font-family="Menlo, monospace" font-size="24" font-weight="700" fill="#0b2e2a">npx -y boe-mcp</text>
+
+  <text x="420" y="503" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="22" fill="#5a7d85">npm &#183; MIT &#183; stdio + HTTP</text>
+</svg>

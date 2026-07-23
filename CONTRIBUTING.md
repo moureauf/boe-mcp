@@ -88,6 +88,23 @@ change. A new tool is a new file in `src/tools/` plus a `registerTool` block in
 `src/server.ts` (give it an `inputSchema`/`outputSchema` like the others). Add
 its row to the tools tables in `README.md` and `CLAUDE.md`.
 
+### Social preview image
+
+`assets/social-preview.png` is the repo's GitHub social preview (Settings →
+General → Social preview) — what link unfurls show on HN/Reddit/Slack/etc.
+GitHub has no API for that setting, so a new render still needs a manual
+drag-and-drop upload after merging.
+
+Regenerate after editing `assets/social-preview.svg` (e.g. to refresh the
+tool badges or copy for a new feature set):
+
+```bash
+rsvg-convert -w 1280 -h 640 assets/social-preview.svg -o assets/social-preview.png
+```
+
+The four tool badges are a representative sample, not the full tool list —
+update them when the headline capabilities change, not on every new tool.
+
 ## Versioning
 
 The version lives in **four** places and is kept in sync automatically by
