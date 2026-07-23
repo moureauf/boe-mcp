@@ -8,6 +8,8 @@
 
 An MCP (Model Context Protocol) server that gives Claude Code — or any MCP client — live Bank of England data: the base rate (current level, change history, statistics over any period, and the rate in force on any past date), **any series from the BoE's IADB statistical database** (SONIA, exchange rates, quoted mortgage rates, and thousands more, with a curated catalog to start from), and the Monetary Policy Committee meeting schedule. It runs over stdio by default (with an opt-in Streamable HTTP mode for remote hosting), needs no API key or configuration, and caches responses in memory so repeated questions don't re-hit the BoE.
 
+![boe-mcp demo: calling get_current_rate and get_next_mpc_meeting, returning live Bank of England data](docs/demo/demo.gif)
+
 Published on npm as [`boe-mcp`](https://www.npmjs.com/package/boe-mcp) with build [provenance](https://docs.npmjs.com/generating-provenance-statements/) — install and run it with `npx -y boe-mcp`.
 
 ## Tools
